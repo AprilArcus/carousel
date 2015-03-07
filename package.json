@@ -1,34 +1,14 @@
 {
   "name": "react-hot-boilerplate",
-  "version": "1.0.0",
-  "description": "Boilerplate for ReactJS project with hot code reloading",
+  "version": "0.0.1",
+  "description": "Carousel Demo for Jim Lee",
   "scripts": {
     "start": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gaearon/react-hot-boilerplate.git"
-  },
-  "keywords": [
-    "react",
-    "reactjs",
-    "boilerplate",
-    "hot",
-    "hot",
-    "reload",
-    "hmr",
-    "live",
-    "edit",
-    "webpack"
-  ],
-  "author": "Dan Abramov <dan.abramov@me.com> (http://github.com/gaearon)",
+  "author": "April Arcus <april.arcus@gmail.com> (http://github.com/aprilarcus)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/gaearon/react-hot-boilerplate/issues"
-  },
-  "homepage": "https://github.com/gaearon/react-hot-boilerplate",
   "devDependencies": {
-    "jsx-loader": "^0.12.2",
+    "babel-loader": "^4.1.0",
     "react-hot-loader": "^1.1.1",
     "webpack": "^1.7.0",
     "webpack-dev-server": "1.6.4"
