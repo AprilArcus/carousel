@@ -3,4 +3,4 @@
 const React = require('react'),
       Carousel = require('./carousel');
 
-React.render(<Carousel />, document.body);
+React.render(<Carousel numItems={6} />, document.body);

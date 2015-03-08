@@ -1,7 +1,7 @@
 {
-  "name": "react-hot-boilerplate",
+  "name": "carousel",
   "version": "0.0.1",
-  "description": "Carousel Demo for Jim Lee",
+  "description": "Carousel Demo",
   "scripts": {
     "start": "node server.js"
   },
@@ -14,6 +14,7 @@
     "webpack-dev-server": "1.6.4"
   },
   "dependencies": {
-    "react": "^0.12.0"
+    "react": "^0.12.0",
+    "immutable": "^3.6.4"
   }
 }
