@@ -8,6 +8,7 @@
         "destructuring": true,
         "forOf": true,
         "generators": true,
+        "modules": true,
         "objectLiteralComputedProperties": true,
         "objectLiteralDuplicateProperties": true,
         "objectLiteralShorthandMethods": true,
@@ -22,8 +23,8 @@
         "jsx": true
     },
     "env": {
-      "node": true,
-      "browser": true,
+        "node": true,
+        "browser": true
     },
     "rules": {
         "no-cond-assign": [2, "except-parens"],

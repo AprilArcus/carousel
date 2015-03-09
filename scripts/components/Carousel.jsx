@@ -3,52 +3,19 @@
 const React = require('react');
 const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 const Immutable = require('immutable');
+const CarouselItem = require('./CarouselItem');
 
-const CarouselItem = React.createClass({
-  mixins: [PureRenderMixin],
-
-  propTypes: {
-    text: React.PropTypes.string
-  },
-
-  styles: {
-    setAspectRatio: {
-      width: '100%',
-      height: 0,
-      paddingBottom: '100%'
-    }
-  },
-
-  render() {
-    let foo = {backgroundColor: this.props.text,
-               width: 10,
-               height: '100%',
-               position: 'absolute',
-               bottom: 0,
-               left: 0,
-               right: 0,
-               margin: '0 auto'
-               };
-
-    return <div style={this.props.style}>
-             <div style={this.styles.setAspectRatio}>
-               <div style={foo} />
-             </div>
-           </div>;
-  }
-});
-
-const Carousel = React.createClass({
+export default React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
     numItems: React.PropTypes.number,
+    numSlots: React.PropTypes.number,
     slideDuration: React.PropTypes.number
   },
 
   getDefaultProps() {
-    return {numItems: 6,
-            slideDuration: 150};
+    return {numItems: 6, numSlots: 6, slideDuration: 150};
   },
 
   enums: {
@@ -61,6 +28,7 @@ const Carousel = React.createClass({
 
   getInitialState() {
     return {sliding: this.enums.sliding.stopped,
+            offsetIndex: 0,
             items: Immutable.List.of('red', 'orange', 'yellow', 'green',
                                      'cyan', 'blue')};
   },
@@ -73,19 +41,11 @@ const Carousel = React.createClass({
   // keyboard input in a game-like way. To this end, we add global event
   // listeners in the lifecycle callbacks...
   componentDidMount() {
-    // if (window.addEventListener) { // standards
     window.addEventListener('keydown', this.handleKeyDown);
-    // } else if (window.attachEvent) { // IE 8
-    //   window.attachEvent('onkeydown', this.handleKeyDown);
-    // }
   },
 
   componentWillUnmount() {
-    // if (window.removeEventListener) { // standards
     window.removeEventListener('keydown', this.handleKeyDown);
-    // } else if (window.detachEvent) { // IE 8
-    //   window.detachEvent('onkeydown', this.handleKeyDown);
-    // }
   },
 
   handleKeyDown(event) {
@@ -97,8 +57,7 @@ const Carousel = React.createClass({
       if (event.keyCode === 37) { // left arrow key
         this.slideBackward();
         event.stopPropagation();
-      }
-      else if (event.keyCode === 39) { // right arrow key
+      } else if (event.keyCode === 39) { // right arrow key
         this.slideForward();
         event.stopPropagation();
       }
@@ -134,13 +93,13 @@ const Carousel = React.createClass({
 
   stopSlide() {
     if (this.state.sliding === this.enums.sliding.backward) {
-      const last = this.state.items.last();
-      const items = this.state.items.pop().unshift(last);
-      this.setState({items: items});
+      const newOffsetIndex =
+        (this.state.offsetIndex - 1 + this.props.numSlots) % this.props.numSlots;
+      this.setState({offsetIndex: newOffsetIndex});
     } else if (this.state.sliding === this.enums.sliding.forward) {
-      const first = this.state.items.first();
-      const items = this.state.items.shift().push(first);
-      this.setState({items: items});
+      const newOffsetIndex =
+        (this.state.offsetIndex + 1) % this.props.numSlots;
+      this.setState({offsetIndex: newOffsetIndex});
     }
     this.setState({sliding: this.enums.sliding.stopped});
   },
@@ -148,29 +107,30 @@ const Carousel = React.createClass({
   // c.f. Christopher Chedeau's terrific talk, "React: CSS in JS"
   // http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html
   // https://vimeo.com/channels/684289/116209150
-
   staticStyles: {
-    container: Immutable.Map({
+    container: {
       display: 'table-row'    // flexbox is the modern way to build
-    }),                       // this type of layout, but display: table
-    verticalAligner: {        // and friends work perfectly and are
-      display: 'table-cell',  // supported ubiquitously.
+    },                        // this type of layout, but display: table
+    verticalAligner: {        // and friends work perfectly for this 
+      display: 'table-cell',  // case and enjoy ubiquitous support.
       verticalAlign: 'middle'
     },
     overflowConcealer: {
       display: 'table-cell',  // 100% of container width after
       width: '100%',          // accounting for the navigational buttons
       overflowX: 'hidden',
-      overflowY: 'hidden'
+      overflowY: 'hidden',
+      textAlign: 'center',
+      verticalAlign: 'middle'
     },
-    slider: Immutable.Map({
+    slider: {
       position: 'relative',   // later, we will calculate how much to
       whiteSpace: 'nowrap'    // shift the slider relative to its parent
-    }),
-    item: Immutable.Map({
+    },
+    item: {
       display: 'inline-block',
-      position: 'relative'
-    }),
+      // position: 'relative'
+    },
     leftArrow: {
       width: 0,
       height: 0,
@@ -194,60 +154,74 @@ const Carousel = React.createClass({
   },
 
   render() {
-    const itemWidth = 100 / this.props.numItems;
-    const styles = {};
-    styles.container = this.staticStyles.container.merge(this.props.style)
-                                                  .toObject();
+    const dynamicStyles = {};
+    // allow our caller to pass inline styles to the outermost container
+    // provided they don't conflict with the ones we use.
+    dynamicStyles.container = Object.assign({},
+                                            this.props.style,
+                                            this.staticStyles.container);
+    let slider;
+    if (false) {
+      slider = 'game over'
+    } else {
+      // calculate the slider's left offset and supply an appropriate
+      // transition: ease while sliding, snap before re-render.
+      const itemWidth = 100 / this.props.numSlots;
+      let slidingStyle;
+      switch(this.state.sliding) {
+        case this.enums.sliding.forward:
+          slidingStyle = {left: `-${2 * itemWidth}%`,
+                          transition: `left ${this.props.slideDuration}ms ease`};
+          break;
+        case this.enums.sliding.backward:
+          slidingStyle = {left: 0,
+                          transition: `left ${this.props.slideDuration}ms ease`};
+          break;
+        default:
+          slidingStyle = {left: `-${itemWidth}%`,
+                          transition: 'none'};
+      }
+      dynamicStyles.slider = Object.assign({},
+                                           this.staticStyles.slider,
+                                           slidingStyle);
 
-    let slidingStyle;
-    switch(this.state.sliding) {
-      case this.enums.sliding.forward:
-        slidingStyle = {left: `-${2 * itemWidth}%`,
-                        transition: `left ${this.props.slideDuration}ms ease`};
-        break;
-      case this.enums.sliding.backward:
-        slidingStyle = {left: 0,
-                        transition: `left ${this.props.slideDuration}ms ease`};
-        break;
-      default:
-        slidingStyle = {left: `-${itemWidth}%`,
-                        transition: 'none'};
+      // get the items we need and render them.
+      dynamicStyles.item = Object.assign({},
+                                         this.staticStyles.item,
+                                         {width: `${itemWidth}%`});
+      const items = Immutable.Repeat(this.state.items)
+                             .flatten(1)
+                             .slice(this.state.offsetIndex,
+                                    this.state.offsetIndex + this.props.numSlots + 2)
+                             .map((e, i) =>
+                                  <CarouselItem key={i}
+                                                style={dynamicStyles.item}
+                                                hp={3}
+                                                seed={e}/>)
+                             .toArray(); // can remove in React 0.13
+      slider = <span style={dynamicStyles.slider}>
+                 {items}
+               </span>
     }
-    styles.slider = this.staticStyles.slider.merge(slidingStyle)
-                                            .toObject();
-
-    styles.item = this.staticStyles.item.merge({width: `${itemWidth}%`})
-                                        .toObject();
-
-    // render the items we need
-    const items = Immutable.Seq(this.state.items)
-                           .concat(this.state.items)
-                           .take(this.props.numItems + 2)
-                           .map( (e, i) => <CarouselItem key={i}
-                                                         style={styles.item}
-                                                         text={e}/>)
-                           .toArray();
 
     return <div style={this.staticStyles.container}>
              <span style={this.staticStyles.verticalAligner}>
                <input type="button"
                       style={this.staticStyles.leftArrow}
-                      disabled={this.state.sliding !== this.enums.sliding.stopped}
+                      disabled={this.state.sliding !==
+                                this.enums.sliding.stopped}
                       onClick={this.slideBackward} />
              </span>
              <span style={this.staticStyles.overflowConcealer}>
-               <span style={styles.slider}>
-                 {items}
-               </span>
+               {slider}
              </span>
              <span style={this.staticStyles.verticalAligner}>
                <input type="button"
                       style={this.staticStyles.rightArrow}
-                      disabled={this.state.sliding !== this.enums.sliding.stopped}
+                      disabled={this.state.sliding !==
+                                this.enums.sliding.stopped}
                       onClick={this.slideForward} />
              </span>
            </div>;
   }
 });
-
-module.exports = Carousel;

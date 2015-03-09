@@ -1,6 +1,8 @@
 'use strict';
 
 const React = require('react'),
-      Carousel = require('./carousel');
+      Carousel = require('./components/Carousel');
 
-React.render(<Carousel numItems={6} />, document.body);
+React.render(<Carousel numSlots={6}
+                       numItems={8}
+                       slideDuration={150} />, document.body);
