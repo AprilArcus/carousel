@@ -195,28 +195,31 @@ export default React.createClass({
                                               style={dynamicStyles.item}
                                               hp={3}
                                               seed={e}/>)
-                           .toArray(); // can remove in React 0.13
+                           .toArray(); // React 0.13 will support custom
+                                       // iterables in JSX, but for now
+                                       // we must cast to the built-in
+                                       // Array type.
 
     return <div style={this.staticStyles.container}>
-             <span style={this.staticStyles.verticalAligner}>
+             <div style={this.staticStyles.verticalAligner}>
                <input type="button"
                       style={this.staticStyles.leftArrow}
                       disabled={this.state.sliding !==
                                 this.enums.sliding.stopped}
                       onClick={this.slideBackward} />
-             </span>
-             <span style={this.staticStyles.overflowConcealer}>
-               <span style={dynamicStyles.slider}>
+             </div>
+             <div style={this.staticStyles.overflowConcealer}>
+               <div style={dynamicStyles.slider}>
                  {items}
-               </span>
-             </span>
-             <span style={this.staticStyles.verticalAligner}>
+               </div>
+             </div>
+             <div style={this.staticStyles.verticalAligner}>
                <input type="button"
                       style={this.staticStyles.rightArrow}
                       disabled={this.state.sliding !==
                                 this.enums.sliding.stopped}
                       onClick={this.slideForward} />
-             </span>
+             </div>
            </div>;
   }
 });
