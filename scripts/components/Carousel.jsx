@@ -160,49 +160,42 @@ export default React.createClass({
     dynamicStyles.container = Object.assign({},
                                             this.props.style,
                                             this.staticStyles.container);
-    let slider;
-    if (false) {
-      slider = 'game over'
-    } else {
-      // calculate the slider's left offset and supply an appropriate
-      // transition: ease while sliding, snap before re-render.
-      const itemWidth = 100 / this.props.numSlots;
-      let slidingStyle;
-      switch(this.state.sliding) {
-        case this.enums.sliding.forward:
-          slidingStyle = {left: `-${2 * itemWidth}%`,
-                          transition: `left ${this.props.slideDuration}ms ease`};
-          break;
-        case this.enums.sliding.backward:
-          slidingStyle = {left: 0,
-                          transition: `left ${this.props.slideDuration}ms ease`};
-          break;
-        default:
-          slidingStyle = {left: `-${itemWidth}%`,
-                          transition: 'none'};
-      }
-      dynamicStyles.slider = Object.assign({},
-                                           this.staticStyles.slider,
-                                           slidingStyle);
 
-      // get the items we need and render them.
-      dynamicStyles.item = Object.assign({},
-                                         this.staticStyles.item,
-                                         {width: `${itemWidth}%`});
-      const items = Immutable.Repeat(this.state.items)
-                             .flatten(1)
-                             .slice(this.state.offsetIndex,
-                                    this.state.offsetIndex + this.props.numSlots + 2)
-                             .map((e, i) =>
-                                  <CarouselItem key={i}
-                                                style={dynamicStyles.item}
-                                                hp={3}
-                                                seed={e}/>)
-                             .toArray(); // can remove in React 0.13
-      slider = <span style={dynamicStyles.slider}>
-                 {items}
-               </span>
+    // calculate the slider's left offset and supply an appropriate
+    // transition: ease while sliding, snap before re-render.
+    const itemWidth = 100 / this.props.numSlots;
+    let slidingStyle;
+    switch(this.state.sliding) {
+      case this.enums.sliding.forward:
+        slidingStyle = {left: `-${2 * itemWidth}%`,
+                        transition: `left ${this.props.slideDuration}ms ease`};
+        break;
+      case this.enums.sliding.backward:
+        slidingStyle = {left: 0,
+                        transition: `left ${this.props.slideDuration}ms ease`};
+        break;
+      default:
+        slidingStyle = {left: `-${itemWidth}%`,
+                        transition: 'none'};
     }
+    dynamicStyles.slider = Object.assign({},
+                                         this.staticStyles.slider,
+                                         slidingStyle);
+
+    // get the items we need and render them.
+    dynamicStyles.item = Object.assign({},
+                                       this.staticStyles.item,
+                                       {width: `${itemWidth}%`});
+    const items = Immutable.Repeat(this.state.items)
+                           .flatten(1)
+                           .slice(this.state.offsetIndex,
+                                  this.state.offsetIndex + this.props.numSlots + 2)
+                           .map((e, i) =>
+                                <CarouselItem key={i}
+                                              style={dynamicStyles.item}
+                                              hp={3}
+                                              seed={e}/>)
+                           .toArray(); // can remove in React 0.13
 
     return <div style={this.staticStyles.container}>
              <span style={this.staticStyles.verticalAligner}>
@@ -213,7 +206,9 @@ export default React.createClass({
                       onClick={this.slideBackward} />
              </span>
              <span style={this.staticStyles.overflowConcealer}>
-               {slider}
+               <span style={dynamicStyles.slider}>
+                 {items}
+               </span>
              </span>
              <span style={this.staticStyles.verticalAligner}>
                <input type="button"
