@@ -13,9 +13,34 @@ export default React.createClass({
 
   propTypes: {
     numItems: React.PropTypes.number,
-    numSlots: React.PropTypes.number,
+    numSlots: function(props, propName, componentName) {
+
+      function rangeCheck(props, propName, componentName) {
+        if (props[propName] > props.numItems) {
+              return new Error('Carousel may not be initialized with ' +
+                               'more slots than items.')
+        }
+      }
+
+      let error;
+      [React.PropTypes.number, rangeCheck].every( validator => {
+        // side effects are sometimes useful
+        error = validator(props, propName, componentName);
+        return !error;
+      });
+      return error;
+
+    },
     slideDuration: React.PropTypes.number,
     fullscreen: React.PropTypes.bool
+  },
+
+  validateSlots(props, propName, componentName) {
+    React.PropTypes.number(props, propName, componentName);
+    if (props[propName] > props.numItems) {
+      return new Error('Carousel may not be initialized with more slots' +
+                       'than items')
+    }
   },
 
   getDefaultProps() {
