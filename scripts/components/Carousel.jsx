@@ -270,7 +270,6 @@ export default React.createClass({
         // allow our caller to set styles on us, provided they don't
         // conflict with any that we neeed.
         return Object.assign({}, this.props.style, this.staticStyles.container);
-        break;
 
       case 'message':
         let messageStyle;
@@ -281,7 +280,6 @@ export default React.createClass({
           messageStyle = {transform: 'scale(0,0)', transition: 'none'};
         }
         return Object.assign({}, this.staticStyles.message, messageStyle);
-        break;
 
       case 'slider':
         // calculate the slider's left offset and supply an appropriate
@@ -297,11 +295,9 @@ export default React.createClass({
           slidingStyle = {left: `-${itemWidth}%`, transition: 'none'};
         }
         return Object.assign({}, this.staticStyles.slider, slidingStyle);
-        break;
 
       case 'item':
         return Object.assign({}, this.staticStyles.item, {width: `${itemWidth}%`});
-        break;
 
       // no default
     }
