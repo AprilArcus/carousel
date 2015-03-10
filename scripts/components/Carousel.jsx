@@ -173,6 +173,10 @@ export default React.createClass({
     this.setState({sliding: this.enums.sliding.STOPPED});
   },
 
+  // We store styles internally and apply them inline with JS. While
+  // heterodox, this gives us the freedom to calculate styles on the fly
+  // without using global classnames, and facilitates componentization.
+  //
   // c.f. Christopher Chedeau's terrific talk, "React: CSS in JS"
   // http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html
   // https://vimeo.com/channels/684289/116209150
@@ -260,7 +264,7 @@ export default React.createClass({
   dynamicStyles(key) {
     // I'm using this gigantic switch statement as a sort of key-value
     // store for functions with 'this' set to the React component
-    // instance.
+    // instance. There is probably a nicer way to do it.
     //
     // It might be better if these were each their own method.
     const itemWidth = 100 / this.props.numSlots;
@@ -286,13 +290,13 @@ export default React.createClass({
         // transition: ease while sliding, snap before the re-render.
         let slidingStyle;
         if (this.state.sliding === this.enums.sliding.FORWARD) {
-          slidingStyle = {left: `-${2 * itemWidth}%`,
+          slidingStyle = {left: `-${3 * itemWidth}%`,
                           transition: `left ${this.props.slideDuration}ms ease`};
         } else if (this.state.sliding === this.enums.sliding.BACKWARD) {
-          slidingStyle = {left: 0,
+          slidingStyle = {left: `-${1 * itemWidth}%`,
                           transition: `left ${this.props.slideDuration}ms ease`};
         } else {
-          slidingStyle = {left: `-${itemWidth}%`, transition: 'none'};
+          slidingStyle = {left: `-${2 * itemWidth}%`, transition: 'none'};
         }
         return Object.assign({}, this.staticStyles.slider, slidingStyle);
 
