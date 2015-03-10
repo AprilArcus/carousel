@@ -3,6 +3,7 @@
 const React = require('react');
 const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 const seedrandom = require('seedrandom');
+const CarouselActions = require('../actions/CarouselActions');
 
 // An ES6 transliteration of Mike Ounsworth's random polygon
 // algorithm c.f. http://stackoverflow.com/a/25276331
@@ -82,35 +83,67 @@ export default React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
-    hp: React.PropTypes.number.isRequired,
-    seed: React.PropTypes.string.isRequired
+    index: React.PropTypes.number.isRequired,
+    seed: React.PropTypes.string.isRequired,
+    hp: React.PropTypes.number.isRequired
   },
 
   getInitialState() {
-    const rng = seedrandom(this.props.seed);
+    return this.generateRandomPolygonFromSeed(this.props.seed);
+  },
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.seed !== nextProps.seed) {
+      this.setState(this.generateRandomPolygonFromSeed(nextProps.seed));
+    }
+  },
+
+  generateRandomPolygonFromSeed(seed) {
+    const rng = seedrandom(seed);
     const hue = Math.floor(rng() * 360);
+    const zIndex = Math.floor(rng() * 20);
     const irregularity = rng() * 0.8;
     const spikeyness = rng() * 0.6;
     const numVerts = Math.floor(3 + rng() * 5);
     const vertices = randomPolygon(0, 0, 25, irregularity, spikeyness,
                                    numVerts, rng);
-    return {hue: hue,
-            vertices: vertices};
+    const points = vertices.map(vertex => vertex.join(',')).join(' ');
+    return {hue, points, zIndex};
   },
 
-  componentWillReceiveProps() {
-    this.setState(this.getInitialState());
+  hit() {
+    if (this.props.hp > 0) {
+      CarouselActions.hit(this.props.index);
+    }
   },
 
   render() {
-    const points = this.state.vertices.map(vertex => vertex.join(','))
-                                      .join(' ');
-    return <div style={this.props.style}>
-             <svg width="100%" viewBox="-50 -50 100 100">
-               <polygon points={points}
+    const outerStyle = Object.assign({},
+                                     this.props.style,
+                                     {position: 'relative',
+                                      zIndex: this.state.zIndex})
+
+    let shrink;
+    if (this.props.hp > 0) {
+      // bounce
+      shrink = `${this.props.hp * 150}ms cubic-bezier(.39,1.41,.93,1.13)`
+    } else {
+      shrink = '75ms ease-in'
+    }
+
+    return <div style={outerStyle}>
+             <svg width="100%"
+                  viewBox="-50 -50 100 100"
+                  style={{overflow: 'visible',
+                          transform: `rotate(${this.props.hp * 137}deg)`,
+                          transition: `transform ${this.props.hp * 150}ms cubic-bezier(0,.4,.4,1)`}}>
+               <polygon points={this.state.points}
                         style={{fill: `hsl(${this.state.hue},100%,50%)`,
-                                strokeWidth: 1,
-                                stroke: 'black'}} />
+                                transform: `scale(${this.props.hp},${this.props.hp})`,
+                                strokeWidth: 4/this.props.hp,
+                                stroke: `hsl(${this.state.hue},100%,25%)`,
+                                transition: `all ${shrink}`}}
+                        onClickCapture={this.hit} />
              </svg>
            </div>;
   }
