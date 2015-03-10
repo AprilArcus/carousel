@@ -211,7 +211,7 @@ export default React.createClass({
     buttonGroup: {
       textAlign: 'right'
     },
-    button: {
+    button: { // fake Twitter Bootstrap button
       display: 'inlineBlock',
       webkitAppearance: 'button',
       marginLeft: 4,
@@ -226,6 +226,9 @@ export default React.createClass({
   },
 
   render() {
+    // suppress render until the backing store is initialized
+    if (this.state.items === undefined) return <div />
+
     const dynamicStyles = {};
     const itemWidth = 100 / this.props.numSlots;
     dynamicStyles.slider = Object.assign({},
@@ -234,56 +237,52 @@ export default React.createClass({
                                          //  paddingBottom: `${itemWidth}%`}
                                           )
 
-    let items;
-    if (this.state.items === undefined) {
-      // suppress render until the backing store is initialized
-      return <div />
     // } else if (this.state.gameOver) {
-      // items = <div style={this.staticStyles.gameOverVerticalAligner}>
-      //           <div style={this.staticStyles.gameOverText}>
-      //             Game Over
-      //           </div>
-      //         </div>
-    } else {
-      // calculate the slider's left offset and supply an appropriate
-      // transition: ease while sliding, snap before re-render.
-      let slidingStyle;
-      switch(this.state.sliding) {
-        case this.enums.sliding.forward:
-          slidingStyle = {left: `-${2 * itemWidth}%`,
-                          transition: `left ${this.props.slideDuration}ms ease`};
-          break;
-        case this.enums.sliding.backward:
-          slidingStyle = {left: 0,
-                          transition: `left ${this.props.slideDuration}ms ease`};
-          break;
-        default:
-          slidingStyle = {left: `-${itemWidth}%`,
-                          transition: 'none'};
-        }
-        Object.assign(dynamicStyles.slider, slidingStyle);
+    // items = <div style={this.staticStyles.gameOverVerticalAligner}>
+    //           <div style={this.staticStyles.gameOverText}>
+    //             Game Over
+    //           </div>
+    //         </div>
 
-        // get the items we need and render them.
-        dynamicStyles.item = Object.assign({},
-                                           this.staticStyles.item,
-                                           {width: `${itemWidth}%`});
-        const withIndices = this.state.items.toKeyedSeq()
-                                            .map( (shape, storeIndex) =>
-                                                  [shape, storeIndex] );
-        const circularized = Immutable.Repeat(withIndices).flatten(1);
-        const slice = circularized.slice(this.state.offsetIndex,
-                                         this.state.offsetIndex + this.props.numSlots + 2);
-        items = slice.map( ([shape, storeIndex], sliceIndex) =>
-                           <CarouselItem key={storeIndex + Math.floor(sliceIndex / this.state.items.size)}
-                                         index={storeIndex}
-                                         style={dynamicStyles.item}
-                                         hp={shape.hp}
-                                         seed={shape.seed}/>);
-        items = items.toArray(); // React 0.13 will support custom
-                                 // iterables in JSX, but for now
-                                 // we must cast to the built-in
-                                 // Array type.
-    }
+    // calculate the slider's left offset and supply an appropriate
+    // transition: ease while sliding, snap before re-render.
+    let slidingStyle;
+    switch(this.state.sliding) {
+      case this.enums.sliding.forward:
+        slidingStyle = {left: `-${2 * itemWidth}%`,
+                        transition: `left ${this.props.slideDuration}ms ease`};
+        break;
+      case this.enums.sliding.backward:
+        slidingStyle = {left: 0,
+                        transition: `left ${this.props.slideDuration}ms ease`};
+        break;
+      default:
+        slidingStyle = {left: `-${itemWidth}%`,
+                        transition: 'none'};
+      }
+    Object.assign(dynamicStyles.slider, slidingStyle);
+
+    // get the items we need and render them.
+    dynamicStyles.item = Object.assign({},
+                                       this.staticStyles.item,
+                                       {width: `${itemWidth}%`});
+    const withIndices = this.state.items.toKeyedSeq()
+                                        .map( (shape, storeIndex) =>
+                                              [shape, storeIndex] );
+    const circularized = Immutable.Repeat(withIndices).flatten(1);
+    const slice = circularized.slice(this.state.offsetIndex,
+                                     this.state.offsetIndex + this.props.numSlots + 2);
+    let items = slice.map( ([shape, storeIndex], sliceIndex) =>
+      <CarouselItem key={storeIndex +                       // a unique and
+                         Math.floor(sliceIndex /            // stable key saves
+                                    this.state.items.size)} // DOM operations
+                    index={storeIndex}
+                    style={dynamicStyles.item}
+                    hp={shape.hp}
+                    seed={shape.seed}/>);
+    items = items.toArray(); // FIXME: React 0.13 will support custom
+                             // iterables in JSX, but for now we must
+                             // convert to the built-in Array type.
 
     return <div style={{position: 'relative'}}
                 onClick={this.handleGenericInteraction}>
