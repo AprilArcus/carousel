@@ -17,8 +17,8 @@ export default React.createClass({
 
       function rangeCheck(props, propName, componentName) {
         if (props[propName] > props.numItems) {
-              return new Error('Carousel must be initialized with ' +
-                               'enough items to fill every slot.');
+          return new Error('Carousel must be initialized with ' +
+                           'enough items to fill every slot.');
         }
       }
 
