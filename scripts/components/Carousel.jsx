@@ -2,6 +2,7 @@
 
 const React = require('react');
 const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
+const keyMirror = require('react/lib/keyMirror');
 const Immutable = require('immutable');
 const CarouselItem = require('./CarouselItem');
 const CarouselStore = require('../stores/CarouselStore');
@@ -26,15 +27,15 @@ export default React.createClass({
   },
 
   enums: {
-    sliding: {
-      backward: -1,
-      stopped: 0,
-      forward: 1
-    }
+    sliding: keyMirror({
+      BACKWARD: null,
+      STOPPED: null,
+      FORWARD: null
+    })
   },
 
   getInitialState() {
-    return {sliding: this.enums.sliding.stopped,
+    return {sliding: this.enums.sliding.STOPPED,
             offsetIndex: 0,
             genericInteractions: 0,
             gameOver: false};
@@ -42,7 +43,7 @@ export default React.createClass({
 
   componentDidMount() {
     CarouselStore.addChangeListener(this.onChange);
-    this.reset();
+    this.handleReset();
     // React's onKeyDown event only listens when the component or
     // a child has focus. This is certainly the right thing to do
     // in general (what if we have multiple of these carousel
@@ -78,7 +79,7 @@ export default React.createClass({
     // KeyboardEvent.key and KeyboardEvent.code remain unimplemented:
     // https://bugzilla.mozilla.org/show_bug.cgi?id=680830
     if (document.activeElement.tagName === 'BODY' &&
-        this.state.sliding === this.enums.sliding.stopped) {
+        this.state.sliding === this.enums.sliding.STOPPED) {
       if ((event.keyCode === 0x25 ||  // left arrow
            event.keyCode === 0x48 ||  // h
            event.keyCode === 0x41) && // a
@@ -99,14 +100,23 @@ export default React.createClass({
 
   handleGenericInteraction() {
     this.setState({genericInteractions: this.state.genericInteractions + 1})
-    // don't respawn if the user's first interaction is with 'clear'!
+    // don't respawn if the user's first interaction is with the
+    // 'clear' button!
     if ((this.state.genericInteractions + 1) % this.props.respawnThreshold === 0) {
       CarouselActions.respawn();
     }
   },
 
+  handleReset() {
+    CarouselActions.reset(this.props.numItems);
+  },
+
+  handleClear() {
+    CarouselActions.clear();
+  },
+
   slideBackward() {
-    this.setState({sliding: this.enums.sliding.backward});
+    this.setState({sliding: this.enums.sliding.BACKWARD});
     // Listening for transitionEnd events is unreliable across browsers
     // and not yet supported by the React public API.
     //
@@ -122,34 +132,26 @@ export default React.createClass({
     // }
     //
     // but we would still need to call setTimeout as a backup and to
-    // support older browsers so for now we opt for parsimony.
+    // support older browsers, so for now we opt for parsimony.
     window.setTimeout(this.stopSlide, this.props.slideDuration);
   },
 
   slideForward() {
-    this.setState({sliding: this.enums.sliding.forward});
+    this.setState({sliding: this.enums.sliding.FORWARD});
     window.setTimeout(this.stopSlide, this.props.slideDuration);
   },
 
   stopSlide() {
-    if (this.state.sliding === this.enums.sliding.backward) {
+    if (this.state.sliding === this.enums.sliding.BACKWARD) {
       const newOffsetIndex =
         (this.state.offsetIndex - 1 + this.props.numItems) % this.props.numItems;
       this.setState({offsetIndex: newOffsetIndex});
-    } else if (this.state.sliding === this.enums.sliding.forward) {
+    } else if (this.state.sliding === this.enums.sliding.FORWARD) {
       const newOffsetIndex =
         (this.state.offsetIndex + 1) % this.props.numItems;
       this.setState({offsetIndex: newOffsetIndex});
     }
-    this.setState({sliding: this.enums.sliding.stopped});
-  },
-
-  reset() {
-    CarouselActions.reset(this.props.numItems);
-  },
-
-  clear() {
-    CarouselActions.clear();
+    this.setState({sliding: this.enums.sliding.STOPPED});
   },
 
   // c.f. Christopher Chedeau's terrific talk, "React: CSS in JS"
@@ -248,11 +250,11 @@ export default React.createClass({
     // transition: ease while sliding, snap before re-render.
     let slidingStyle;
     switch(this.state.sliding) {
-      case this.enums.sliding.forward:
+      case this.enums.sliding.FORWARD:
         slidingStyle = {left: `-${2 * itemWidth}%`,
                         transition: `left ${this.props.slideDuration}ms ease`};
         break;
-      case this.enums.sliding.backward:
+      case this.enums.sliding.BACKWARD:
         slidingStyle = {left: 0,
                         transition: `left ${this.props.slideDuration}ms ease`};
         break;
@@ -291,7 +293,7 @@ export default React.createClass({
                  <input type="button"
                         style={this.staticStyles.leftArrow}
                         disabled={this.state.sliding !==
-                                  this.enums.sliding.stopped}
+                                  this.enums.sliding.STOPPED}
                         onClick={this.slideBackward} />
                </div>
                <div style={this.staticStyles.overflowConcealer}>
@@ -304,7 +306,7 @@ export default React.createClass({
                  <input type="button"
                         style={this.staticStyles.rightArrow}
                         disabled={this.state.sliding !==
-                                  this.enums.sliding.stopped}
+                                  this.enums.sliding.STOPPED}
                         onClick={this.slideForward} />
                </div>
              </div>
@@ -312,12 +314,12 @@ export default React.createClass({
                <input type="button"
                       style={this.staticStyles.button}
                       value="Reset"
-                      onClick={this.reset} />
+                      onClick={this.handleReset} />
                <input type="button"
                       style={this.staticStyles.button}
                       value="Clear"
                       disabled={this.state.gameOver}
-                      onClick={this.clear} />
+                      onClick={this.handleClear} />
              </div>
            </div>;
   }
