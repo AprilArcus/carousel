@@ -186,18 +186,18 @@ export default React.createClass({
     },                      // tallest carousel item
     endCap: {
       flexShrink: 0,
-      zIndex: 100
-    },
-    stock: {
-      flexGrow: 1,
-      display: 'flex',
+      zIndex: 100           // setting negative zIndex on the carousel
+    },                      // items would break their onClick handlers,
+    stock: {                // so we use positive indices [0,20) there
+      flexGrow: 1,          // to randomize their layering and
+      display: 'flex',      // compensate for it here.
       alignItems: 'center',
-      position: 'relative'    // the stock is the reference for
-    },                        // the slider and the 'game over' message
+      position: 'relative'  // the stock is the reference for
+    },                      // the slider and the 'game over' message
     slider: {
       flexGrow: 1,
-      position: 'relative',   // we will calculate how much to offset
-      whiteSpace: 'nowrap'    // the slider in render()
+      position: 'relative', // we will calculate how much to offset
+      whiteSpace: 'nowrap'  // the slider in dynamicStyles()
     },
     messageContainer: {
       position: 'absolute',
@@ -241,9 +241,9 @@ export default React.createClass({
       position: 'absolute',
       bottom: 4,
       right: 4,
-      zIndex: 100 // setting negative zIndex on the carousel items
-    },            // breaks their onClick handlers.
-    button: { // fake Twitter Bootstrap button
+      zIndex: 100
+    },
+    button: {                     // fake twitter bootstrap button
       display: 'inlineBlock',
       webkitAppearance: 'button',
       marginLeft: 4,
@@ -257,72 +257,90 @@ export default React.createClass({
     }
   },
 
-  render() {
-    const dynamicStyles = {};
-    // allow our caller to set styles on us, provided they don't
-    // conflict with the ones we neeed.
-    dynamicStyles.container = Object.assign({},
-                                            this.props.style,
-                                            this.staticStyles.container)
-
-    // suppress render until the backing store is initialized
-    if (this.state.items === undefined) {
-      return <div style={dynamicStyles.container}/>;
-    }
-
-    let messageStyle;
-    if (this.state.gameOver) {
-      messageStyle = {transform: 'scale(1,1)',
-                      transition: 'transform 450ms cubic-bezier(.4,1.4,.4,1)'};
-    } else {
-      messageStyle = {transform: 'scale(0,0)',
-                      transition: 'none'};
-    }
-    dynamicStyles.message = Object.assign({},
-                                          this.staticStyles.message,
-                                          messageStyle);
-
-    // calculate the slider's left offset and supply an appropriate
-    // transition: ease while sliding, snap before re-render.
+  dynamicStyles(key) {
+    // I'm using this gigantic switch statement as a sort of key-value
+    // store for functions with 'this' set to the React component
+    // instance.
+    //
+    // It might be better if these were each their own method.
     const itemWidth = 100 / this.props.numSlots;
-    let slidingStyle;
-    switch(this.state.sliding) {
-      case this.enums.sliding.FORWARD:
-        slidingStyle = {left: `-${2 * itemWidth}%`,
-                        transition: `left ${this.props.slideDuration}ms ease`};
+
+    switch(key) {
+      case 'container':
+        // allow our caller to set styles on us, provided they don't
+        // conflict with any that we neeed.
+        return Object.assign({}, this.props.style, this.staticStyles.container);
         break;
-      case this.enums.sliding.BACKWARD:
-        slidingStyle = {left: 0,
-                        transition: `left ${this.props.slideDuration}ms ease`};
+
+      case 'message':
+        let messageStyle;
+        if (this.state.gameOver) {
+          messageStyle = {transform: 'scale(1,1)',
+                          transition: 'transform 450ms cubic-bezier(.4,1.4,.4,1)'};
+        } else {
+          messageStyle = {transform: 'scale(0,0)', transition: 'none'};
+        }
+        return Object.assign({}, this.staticStyles.message, messageStyle);
         break;
-      default:
-        slidingStyle = {left: `-${itemWidth}%`, transition: 'none'};
-      }
-    dynamicStyles.slider = Object.assign({}, this.staticStyles.slider, slidingStyle);
-    // get the items we need
-    dynamicStyles.item = Object.assign({},
-                                       this.staticStyles.item,
-                                       {width: `${itemWidth}%`});
+
+      case 'slider':
+        // calculate the slider's left offset and supply an appropriate
+        // transition: ease while sliding, snap before the re-render.
+        let slidingStyle;
+        if (this.state.sliding === this.enums.sliding.FORWARD) {
+          slidingStyle = {left: `-${2 * itemWidth}%`,
+                          transition: `left ${this.props.slideDuration}ms ease`};
+        } else if (this.state.sliding === this.enums.sliding.BACKWARD) {
+          slidingStyle = {left: 0,
+                          transition: `left ${this.props.slideDuration}ms ease`};
+        } else {
+          slidingStyle = {left: `-${itemWidth}%`, transition: 'none'};
+        }
+        return Object.assign({}, this.staticStyles.slider, slidingStyle);
+        break;
+
+      case 'item':
+        return Object.assign({}, this.staticStyles.item, {width: `${itemWidth}%`});
+        break;
+
+      // no default
+    }
+  },
+
+  renderItems() {
+    // Fetch the items we need. We grab four extra (two on each side) to
+    // avoid pop-in.
     const withIndices = this.state.items.toKeyedSeq()
                                         .map( (shape, storeIndex) =>
                                               [shape, storeIndex] );
+    // Immutable.Repeat returns an IndexedSeq
     const circularized = Immutable.Repeat(withIndices).flatten(1);
     const slice = circularized.slice(this.state.offsetIndex,
-                                     this.state.offsetIndex + this.props.numSlots + 2);
-    // render them
-    let items = slice.map( ([shape, storeIndex], sliceIndex) =>
-      <CarouselItem key={storeIndex +                       // a unique and
-                         Math.floor(sliceIndex /            // stable key
-                                    this.state.items.size)} // avoids redraws
+                                     this.state.offsetIndex + this.props.numSlots + 4);
+    // ...and render them.
+    const items = slice.map( ([shape, storeIndex], sliceIndex) =>
+      // a unique and stable key avoids unecessary DOM operations. If we
+      // didn't have padding, the storeIndex would be fine by itself,
+      // but since some shapes will be rendered twice, we take extra
+      // care here.
+      <CarouselItem key={storeIndex + this.state.items.size *
+                         Math.floor(sliceIndex / this.state.items.size)}
                     index={storeIndex}
-                    style={dynamicStyles.item}
+                    style={this.dynamicStyles('item')}
                     hp={shape.hp}
                     seed={shape.seed}/>);
-    items = items.toArray(); // FIXME: React 0.13 will support custom
-                             // iterables in JSX, but for now we must
-                             // convert to the built-in Array type.
+    return items.toArray(); // FIXME: React 0.13 will support custom
+                            // iterables in JSX, but for now we must
+                            // convert to the built-in Array type.
+  },
 
-    return <div style={this.staticStyles.container}
+  render() {
+    // suppress render until the backing store is initialized
+    if (this.state.items === undefined) {
+      return <div style={this.dynamicStyles('container')} />;
+    }
+
+    return <div style={this.dynamicStyles('container')}
                 onClick={this.handleGenericInteraction}>
              <div style={this.staticStyles.endCap}>
                <input type="button"
@@ -332,11 +350,11 @@ export default React.createClass({
                       onClick={this.slideBackward} />
              </div>
              <div style={this.staticStyles.stock}>
-               <div style={dynamicStyles.slider}>
-                 {items}
+               <div style={this.dynamicStyles('slider')}>
+                 {this.renderItems()}
                </div>
                <div style={this.staticStyles.messageContainer}>
-                 <span style={dynamicStyles.message}>
+                 <span style={this.dynamicStyles('message')}>
                    {'Thanks for Playing!'}
                    <br />
                    {'April Arcus <3 Patreon'}
@@ -351,16 +369,16 @@ export default React.createClass({
                       onClick={this.slideForward} />
              </div>
              <div style={this.staticStyles.buttonGroup}>
-                 <input type="button"
-                        style={this.staticStyles.button}
-                        value="Reset"
-                        onClick={this.handleReset} />
-                 <input type="button"
-                        style={this.staticStyles.button}
-                        value="Clear"
-                        disabled={this.state.gameOver}
-                        onClick={this.handleClear} />
-               </div>
+               <input type="button"
+                      style={this.staticStyles.button}
+                      value="Reset"
+                      onClick={this.handleReset} />
+               <input type="button"
+                      style={this.staticStyles.button}
+                      value="Clear"
+                      disabled={this.state.gameOver}
+                      onClick={this.handleClear} />
+             </div>
            </div>;
   }
 });
