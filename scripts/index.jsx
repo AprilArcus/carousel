@@ -6,5 +6,4 @@ const React = require('react'),
 React.render(<Carousel numSlots={6}
                        numItems={8}
                        respawnThreshold={12}
-                       slideDuration={150}
-                       fullscreen={true} />, document.getElementById('carousel'));
+                       slideDuration={150} />, document.getElementById('carousel'));

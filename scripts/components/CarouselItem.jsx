@@ -101,7 +101,7 @@ export default React.createClass({
   generateRandomPolygonFromSeed(seed) {
     const rng = seedrandom(seed);
     const hue = Math.floor(rng() * 360);
-    const zIndex = Math.floor(rng() * 20);
+    const zIndex = Math.floor(rng() * 100);
     const irregularity = rng() * 0.8;
     const spikeyness = rng() * 0.6;
     const numVerts = Math.floor(3 + rng() * 5);
@@ -121,7 +121,8 @@ export default React.createClass({
     const outerStyle = Object.assign({},
                                      this.props.style,
                                      {position: 'relative',
-                                      zIndex: this.state.zIndex})
+                                      zIndex: this.state.zIndex
+                                    })
 
     let shrink;
     if (this.props.hp > 0) {

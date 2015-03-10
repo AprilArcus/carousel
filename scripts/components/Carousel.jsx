@@ -18,7 +18,7 @@ export default React.createClass({
       function rangeCheck(props, propName, componentName) {
         if (props[propName] > props.numItems) {
               return new Error('Carousel must be initialized with ' +
-                               'enough items to fill every slot.')
+                               'enough items to fill every slot.');
         }
       }
 
@@ -31,16 +31,8 @@ export default React.createClass({
       return error;
 
     },
-    slideDuration: React.PropTypes.number,
-    fullscreen: React.PropTypes.bool
-  },
-
-  validateSlots(props, propName, componentName) {
-    React.PropTypes.number(props, propName, componentName);
-    if (props[propName] > props.numItems) {
-      return new Error('Carousel may not be initialized with more slots' +
-                       'than items')
-    }
+    respawnThreshold: React.PropTypes.number,
+    slideDuration: React.PropTypes.number
   },
 
   getDefaultProps() {
@@ -124,20 +116,22 @@ export default React.createClass({
   },
 
   handleGenericInteraction() {
-    this.setState({genericInteractions: this.state.genericInteractions + 1})
-    // don't respawn if the user's first interaction is with the
-    // 'clear' button!
-    if ((this.state.genericInteractions + 1) % this.props.respawnThreshold === 0) {
+    this.setState({genericInteractions: this.state.genericInteractions + 1});
+    if (this.state.genericInteractions % this.props.respawnThreshold === 0) {
       CarouselActions.respawn();
     }
+    event.stopPropagation();
   },
 
   handleReset() {
     CarouselActions.reset(this.props.numItems);
   },
 
-  handleClear() {
+  handleClear(event) {
     CarouselActions.clear();
+    // don't let clicks on the 'clear' button bubble up to the generic
+    // interaction handler.
+    event.stopPropagation();
   },
 
   slideBackward() {
@@ -184,36 +178,44 @@ export default React.createClass({
   // https://vimeo.com/channels/684289/116209150
   staticStyles: {
     container: {
-      display: 'table-row'    // flexbox is the modern way to build
-    },                        // this type of layout, but display: table
-    verticalAligner: {        // and friends work adequately for this 
-      display: 'table-cell',  // case and enjoy ubiquitous support.
-      verticalAlign: 'middle'
+      position: 'relative', // we'll position the reset and clear
+      display: 'flex',      // buttons relative to the outer div
+      alignItems: 'center',
+      height: '100%',       // occupy the full height of our parent
+      overflow: 'hidden'    // rather than the natural height of the
+    },                      // tallest carousel item
+    endCap: {
+      flexShrink: 0,
+      zIndex: 100
     },
-    overflowConcealer: {
-      display: 'table-cell',  // 100% of container width after
-      width: '100%',          // accounting for the navigational buttons
-      overflowX: 'hidden',
-      overflowY: 'hidden'
-    },
+    stock: {
+      flexGrow: 1,
+      display: 'flex',
+      alignItems: 'center',
+      position: 'relative'    // the stock is the reference for
+    },                        // the slider and the 'game over' message
     slider: {
-      position: 'relative',   // later, we will calculate how much to
-      whiteSpace: 'nowrap'    // shift the slider relative to its parent
+      flexGrow: 1,
+      position: 'relative',   // we will calculate how much to offset
+      whiteSpace: 'nowrap'    // the slider in render()
+    },
+    messageContainer: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    message: {
+      textAlign: 'center',
+      fontSize: 50,
+      fontWeight: 100
     },
     item: {
       display: 'inline-block'
-    },
-    gameOverVerticalAligner: { //    flexbox would have obviated the
-      position: 'absolute',    // 1  need for this non-semantic wrapper
-      top: '50%',              // 2  div and these five numbered style
-      width: '100%'            // 3  properties
-    },
-    gameOverText: {
-      position: 'absolute',    // 4
-      top: '-0.5em',           // 5  
-      width: '100%',
-      textAlign: 'center',
-      fontSize: 50
     },
     leftArrow: {
       width: 0,
@@ -236,8 +238,11 @@ export default React.createClass({
       borderLeft: '15px solid black'
     },
     buttonGroup: {
-      textAlign: 'right'
-    },
+      position: 'absolute',
+      bottom: 4,
+      right: 4,
+      zIndex: 100 // setting negative zIndex on the carousel items
+    },            // breaks their onClick handlers.
     button: { // fake Twitter Bootstrap button
       display: 'inlineBlock',
       webkitAppearance: 'button',
@@ -253,26 +258,33 @@ export default React.createClass({
   },
 
   render() {
-    // suppress render until the backing store is initialized
-    if (this.state.items === undefined) return <div />
-
     const dynamicStyles = {};
-    const itemWidth = 100 / this.props.numSlots;
-    dynamicStyles.slider = Object.assign({},
-                                         this.staticStyles.slider
-                                         // {height: 0,
-                                         //  paddingBottom: `${itemWidth}%`}
-                                          )
+    // allow our caller to set styles on us, provided they don't
+    // conflict with the ones we neeed.
+    dynamicStyles.container = Object.assign({},
+                                            this.props.style,
+                                            this.staticStyles.container)
 
-    // } else if (this.state.gameOver) {
-    // items = <div style={this.staticStyles.gameOverVerticalAligner}>
-    //           <div style={this.staticStyles.gameOverText}>
-    //             Game Over
-    //           </div>
-    //         </div>
+    // suppress render until the backing store is initialized
+    if (this.state.items === undefined) {
+      return <div style={dynamicStyles.container}/>;
+    }
+
+    let messageStyle;
+    if (this.state.gameOver) {
+      messageStyle = {transform: 'scale(1,1)',
+                      transition: 'transform 450ms cubic-bezier(.4,1.4,.4,1)'};
+    } else {
+      messageStyle = {transform: 'scale(0,0)',
+                      transition: 'none'};
+    }
+    dynamicStyles.message = Object.assign({},
+                                          this.staticStyles.message,
+                                          messageStyle);
 
     // calculate the slider's left offset and supply an appropriate
     // transition: ease while sliding, snap before re-render.
+    const itemWidth = 100 / this.props.numSlots;
     let slidingStyle;
     switch(this.state.sliding) {
       case this.enums.sliding.FORWARD:
@@ -284,12 +296,10 @@ export default React.createClass({
                         transition: `left ${this.props.slideDuration}ms ease`};
         break;
       default:
-        slidingStyle = {left: `-${itemWidth}%`,
-                        transition: 'none'};
+        slidingStyle = {left: `-${itemWidth}%`, transition: 'none'};
       }
-    Object.assign(dynamicStyles.slider, slidingStyle);
-
-    // get the items we need and render them.
+    dynamicStyles.slider = Object.assign({}, this.staticStyles.slider, slidingStyle);
+    // get the items we need
     dynamicStyles.item = Object.assign({},
                                        this.staticStyles.item,
                                        {width: `${itemWidth}%`});
@@ -299,10 +309,11 @@ export default React.createClass({
     const circularized = Immutable.Repeat(withIndices).flatten(1);
     const slice = circularized.slice(this.state.offsetIndex,
                                      this.state.offsetIndex + this.props.numSlots + 2);
+    // render them
     let items = slice.map( ([shape, storeIndex], sliceIndex) =>
       <CarouselItem key={storeIndex +                       // a unique and
-                         Math.floor(sliceIndex /            // stable key saves
-                                    this.state.items.size)} // DOM operations
+                         Math.floor(sliceIndex /            // stable key
+                                    this.state.items.size)} // avoids redraws
                     index={storeIndex}
                     style={dynamicStyles.item}
                     hp={shape.hp}
@@ -311,41 +322,45 @@ export default React.createClass({
                              // iterables in JSX, but for now we must
                              // convert to the built-in Array type.
 
-    return <div style={{position: 'relative'}}
+    return <div style={this.staticStyles.container}
                 onClick={this.handleGenericInteraction}>
-             <div style={this.staticStyles.container}>
-               <div style={this.staticStyles.verticalAligner}>
-                 <input type="button"
-                        style={this.staticStyles.leftArrow}
-                        disabled={this.state.sliding !==
-                                  this.enums.sliding.STOPPED}
-                        onClick={this.slideBackward} />
+             <div style={this.staticStyles.endCap}>
+               <input type="button"
+                      style={this.staticStyles.leftArrow}
+                      disabled={this.state.sliding !==
+                                this.enums.sliding.STOPPED}
+                      onClick={this.slideBackward} />
+             </div>
+             <div style={this.staticStyles.stock}>
+               <div style={dynamicStyles.slider}>
+                 {items}
                </div>
-               <div style={this.staticStyles.overflowConcealer}>
-                 <div style={dynamicStyles.slider}>
-                   {items}
-                 </div>
-                 Game Over
+               <div style={this.staticStyles.messageContainer}>
+                 <span style={dynamicStyles.message}>
+                   {'Thanks for Playing!'}
+                   <br />
+                   {'April Arcus <3 Patreon'}
+                 </span>
                </div>
-               <div style={this.staticStyles.verticalAligner}>
-                 <input type="button"
-                        style={this.staticStyles.rightArrow}
-                        disabled={this.state.sliding !==
-                                  this.enums.sliding.STOPPED}
-                        onClick={this.slideForward} />
-               </div>
+             </div>
+             <div style={this.staticStyles.endCap}>
+               <input type="button"
+                      style={this.staticStyles.rightArrow}
+                      disabled={this.state.sliding !==
+                                this.enums.sliding.STOPPED}
+                      onClick={this.slideForward} />
              </div>
              <div style={this.staticStyles.buttonGroup}>
-               <input type="button"
-                      style={this.staticStyles.button}
-                      value="Reset"
-                      onClick={this.handleReset} />
-               <input type="button"
-                      style={this.staticStyles.button}
-                      value="Clear"
-                      disabled={this.state.gameOver}
-                      onClick={this.handleClear} />
-             </div>
+                 <input type="button"
+                        style={this.staticStyles.button}
+                        value="Reset"
+                        onClick={this.handleReset} />
+                 <input type="button"
+                        style={this.staticStyles.button}
+                        value="Clear"
+                        disabled={this.state.gameOver}
+                        onClick={this.handleClear} />
+               </div>
            </div>;
   }
 });
