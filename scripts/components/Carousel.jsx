@@ -4,7 +4,7 @@ const React = require('react');
 const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 const keyMirror = require('react/lib/keyMirror');
 const Immutable = require('immutable');
-const CarouselItem = require('./CarouselItem');
+const Shape = require('./Shape');
 const CarouselStore = require('../stores/CarouselStore');
 const CarouselActions = require('../actions/CarouselActions');
 
@@ -319,12 +319,12 @@ export default React.createClass({
       // didn't have padding, the storeIndex would be fine by itself,
       // but since some shapes will be rendered twice, we take extra
       // care here.
-      <CarouselItem key={storeIndex + this.state.items.size *
-                         Math.floor(sliceIndex / this.state.items.size)}
-                    index={storeIndex}
-                    style={this.dynamicStyles('item')}
-                    hp={shape.hp}
-                    seed={shape.seed}/>);
+      <Shape key={storeIndex + this.state.items.size *
+                  Math.floor(sliceIndex / this.state.items.size)}
+             index={storeIndex}
+             style={this.dynamicStyles('item')}
+             hp={shape.hp}
+             seed={shape.seed}/>);
     return items.toArray(); // FIXME: React 0.13 will support custom
                             // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
