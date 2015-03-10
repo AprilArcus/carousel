@@ -166,8 +166,8 @@ export default React.createClass({
     overflowConcealer: {
       display: 'table-cell',  // 100% of container width after
       width: '100%',          // accounting for the navigational buttons
-      overflowX: 'visible',
-      overflowY: 'visible'
+      overflowX: 'hidden',
+      overflowY: 'hidden'
     },
     slider: {
       position: 'relative',   // later, we will calculate how much to

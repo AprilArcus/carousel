@@ -9,22 +9,18 @@ const CHANGE_EVENT = 'change';
 
 let _shapes = Immutable.List();
 
-// the elegance of Immutable.Record's Object-like API is marred by its
-// inability to set default values with a callback, but we'll cope.
-function defaultShapeValues() {
-  return {seed: String(Math.random()),
-          hp: Math.floor(2 + 5 * Math.random())}
-}
 class Shape extends Immutable.Record({seed: undefined, hp: undefined}) {
+  static random() {
+    return new Shape({seed: String(Math.random()),
+                      hp: Math.floor(2 + 5 * Math.random())});
+  }
   isDead() {
     return this.hp <= 0;
   }
 }
 
 function reset(numItems) {
-  _shapes = _shapes.setSize(numItems).map(
-    () => new Shape(defaultShapeValues())
-  );
+  _shapes = _shapes.setSize(numItems).map( () => Shape.random() );
 }
 
 function clear() {
@@ -41,7 +37,7 @@ function respawn() {
   if (candidateIndices.size > 0) {
     const randomIndexIntoCandidateIndices = Math.floor(Math.random() * candidateIndices.size);
     const targetIndex = candidateIndices.get(randomIndexIntoCandidateIndices);
-    _shapes = _shapes.set(targetIndex, new Shape(defaultShapeValues()));
+    _shapes = _shapes.set(targetIndex, Shape.random());
   }
 }
 
