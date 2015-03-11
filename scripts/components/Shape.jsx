@@ -1,8 +1,9 @@
 /* eslint-env es6, node */
-const React = require('react');
-const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
-const seedrandom = require('seedrandom');
-const CarouselActions = require('../actions/CarouselActions');
+import React from 'react';
+import { addons } from 'react/addons';
+const PureRenderMixin = addons.PureRenderMixin;
+import seedrandom from 'seedrandom';
+import CarouselActions from '../actions/CarouselActions';
 
 /* eslint-disable no-extra-parens, camelcase */
 // An ES6 transliteration of Mike Ounsworth's random polygon
@@ -77,8 +78,7 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts
   }
 
   return points;
-}
-/* eslint-enable no-extra-parens, camelcase */
+}                         /* eslint-enable no-extra-parens, camelcase */
 
 function generateRandomPolygonFromSeed(seed) {
   const rng = seedrandom(seed);
@@ -93,10 +93,10 @@ function generateRandomPolygonFromSeed(seed) {
   return {hue, points, zIndex};
 }
 
-const tweeners = {
+const tweeners = {                      /* eslint-disable key-spacing */
   bounce:   'cubic-bezier(0.39,1.41,0.93,1.13)',
   friction: 'cubic-bezier(0.00,0.40,0.40,1.00)'
-};
+};                                      /* eslint-enable key-spacing  */
 
 export default React.createClass({
   mixins: [PureRenderMixin],

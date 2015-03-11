@@ -1,5 +1,5 @@
 /* eslint-env es6, node */
-const keyMirror = require('react/lib/keyMirror');
+import keyMirror from 'react/lib/keyMirror';
 
 export default keyMirror({
   CAROUSEL_RESET: null,

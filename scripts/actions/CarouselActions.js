@@ -1,6 +1,6 @@
 /* eslint-env es6, node */
-const AppDispatcher = require('../dispatcher/AppDispatcher');
-const CarouselConstants = require('../constants/CarouselConstants');
+import AppDispatcher from '../dispatcher/AppDispatcher';
+import CarouselConstants from '../constants/CarouselConstants';
 
 export default {
   reset: function(numItems) {

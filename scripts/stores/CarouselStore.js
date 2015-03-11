@@ -1,9 +1,10 @@
 /* eslint-env es6, node */
 /* eslint-disable no-underscore-dangle */
-const AppDispatcher = require('../dispatcher/AppDispatcher');
-const EventEmitter = require('events').EventEmitter;
-const CarouselConstants = require('../constants/CarouselConstants');
-const Immutable = require('immutable');
+
+import AppDispatcher from '../dispatcher/AppDispatcher';
+import { EventEmitter } from 'events';
+import CarouselConstants from '../constants/CarouselConstants';
+import Immutable from 'immutable';
 
 const CHANGE_EVENT = 'change';
 

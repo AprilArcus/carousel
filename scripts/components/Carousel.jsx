@@ -1,11 +1,12 @@
 /* eslint-env es6, node */
-const React = require('react');
-const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
-const keyMirror = require('react/lib/keyMirror');
-const Immutable = require('immutable');
-const Shape = require('./Shape');
-const CarouselStore = require('../stores/CarouselStore');
-const CarouselActions = require('../actions/CarouselActions');
+import React from 'react';
+import { addons } from 'react/addons';
+const PureRenderMixin = addons.PureRenderMixin;
+import keyMirror from 'react/lib/keyMirror';
+import Immutable from 'immutable';
+import Shape from './Shape';
+import CarouselStore from '../stores/CarouselStore';
+import CarouselActions from '../actions/CarouselActions';
 
 export default React.createClass({
   mixins: [PureRenderMixin],
@@ -182,25 +183,31 @@ export default React.createClass({
   styles: {
     container: {
       position: 'relative', // we'll position the reset and clear
-      display: 'flex',      // buttons relative to the outer div
+      display: 'flex',      // buttons relative to the outer div.
       alignItems: 'center',
-      height: '100%',       // occupy the full height of our parent
-      overflow: 'hidden'    // rather than the natural height of the
-    },                      // tallest carousel item
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+      height: '100%' // occupy the full height of our parent rather than
+    },               // the natural height of the tallest carousel item.
     endCap: {
       flexShrink: 0,
-      zIndex: 100           // setting negative zIndex on the carousel
-    },                      // items would break their onClick handlers,
-    stock: {                // so we use positive indices [0,20) there
-      flexGrow: 1,          // to randomize their layering and
-      display: 'flex',      // compensate for it here.
+      zIndex: 100      // setting negative zIndex on the carousel items
+    },                 // would break their onClick handlers, so we use
+    stock: {           // positive indices [0,20) there to randomize
+      flexGrow: 1,     // their layering and compensate for it here.
+      display: 'flex',
       alignItems: 'center',
-      position: 'relative'  // the stock is the reference for
-    },                      // the slider and the 'game over' message
+      // position: 'relative', // the stock is the reference for the
+      position: 'absolute',    // slider and the 'game over' message.
+      top: 0,                  // when running at full bleed, it's
+      right: 0,                // aesthetically preferrable to use
+      bottom: 0,               // absolute positioning -- this
+      left: 0                  // effectively insets the endcaps.
+    },
     slider: {
       flexGrow: 1,
-      position: 'relative', // we will calculate how much to offset
-      whiteSpace: 'nowrap'  // the slider in dynamicStyles()
+      position: 'relative', // we will calculate how much to offset the
+      whiteSpace: 'nowrap'  // slider in sliderStyle()
     },
     messageContainer: {
       position: 'absolute',
@@ -221,7 +228,7 @@ export default React.createClass({
       display: 'inline-block'
     },
     leftArrow: {
-      margin: 5,
+      margin: 10,
       width: 0,
       height: 0,
       backgroundColor: 'transparent',
@@ -232,7 +239,7 @@ export default React.createClass({
       borderLeft: 0
     },
     rightArrow: {
-      margin: 5,
+      margin: 10,
       width: 0,
       height: 0,
       backgroundColor: 'transparent',
@@ -248,7 +255,7 @@ export default React.createClass({
       right: 4,
       zIndex: 100
     },
-    button: {                     // fake twitter bootstrap button
+    button: { // fake twitter bootstrap button
       display: 'inlineBlock',
       webkitAppearance: 'button',
       marginLeft: 4,
@@ -301,16 +308,16 @@ export default React.createClass({
   },
 
   renderItems() {
-    // Fetch the items we need. We grab four extra (two on each side) to
-    // avoid pop-in.
+    // Fetch the items we need. We grab four extra (two on each side)
+    // to mitigate pop-in.
     const withIndices = this.state.items.toKeyedSeq()
                                         .map( (shape, storeIndex) =>
                                               [shape, storeIndex] );
-    // Immutable.Repeat returns an IndexedSeq
+    // n.b. Immutable.Repeat returns an IndexedSeq
     const circularized = Immutable.Repeat(withIndices).flatten(1);
     const slice = circularized.slice(this.state.offsetIndex,
                                      this.state.offsetIndex + this.props.numSlots + 4);
-    // ...and render them.
+    // now render them.
     const items = slice.map( ([shape, storeIndex], sliceIndex) =>
       // a unique and stable key avoids unecessary DOM operations. If we
       // didn't have padding, the storeIndex would be fine by itself,
@@ -323,10 +330,8 @@ export default React.createClass({
              hp={shape.hp}
              seed={shape.seed}/>);
     return items.toArray(); // FIXME: React 0.13 will support custom
-                            // iterables in JSX, but for now we must
+  },                        // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
-  },
-
   render() {
     // suppress render until the backing store is initialized
     if (this.state.items === undefined) {
