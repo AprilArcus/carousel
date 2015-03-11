@@ -79,6 +79,24 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts
   return points;
 }
 
+function generateRandomPolygonFromSeed(seed) {
+  const rng = seedrandom(seed);
+  const hue = Math.floor(rng() * 360);
+  const zIndex = Math.floor(rng() * 100);
+  const irregularity = rng() * 0.8;
+  const spikeyness = rng() * 0.6;
+  const numVerts = Math.floor(3 + rng() * 5);
+  const vertices = randomPolygon(0, 0, 25, irregularity, spikeyness,
+                                 numVerts, rng);
+  const points = vertices.map(vertex => vertex.join(',')).join(' ');
+  return {hue, points, zIndex};
+}
+
+const tweeners = {
+  bounce:   'cubic-bezier(0.39,1.41,0.93,1.13)',
+  friction: 'cubic-bezier(0.00,0.40,0.40,1.00)'
+};
+
 export default React.createClass({
   mixins: [PureRenderMixin],
 
@@ -89,62 +107,63 @@ export default React.createClass({
   },
 
   getInitialState() {
-    return this.generateRandomPolygonFromSeed(this.props.seed);
+    return generateRandomPolygonFromSeed(this.props.seed);
   },
 
   componentWillReceiveProps(nextProps) {
     if (this.props.seed !== nextProps.seed) {
-      this.setState(this.generateRandomPolygonFromSeed(nextProps.seed));
+      this.setState(generateRandomPolygonFromSeed(nextProps.seed));
     }
   },
 
-  generateRandomPolygonFromSeed(seed) {
-    const rng = seedrandom(seed);
-    const hue = Math.floor(rng() * 360);
-    const zIndex = Math.floor(rng() * 100);
-    const irregularity = rng() * 0.8;
-    const spikeyness = rng() * 0.6;
-    const numVerts = Math.floor(3 + rng() * 5);
-    const vertices = randomPolygon(0, 0, 25, irregularity, spikeyness,
-                                   numVerts, rng);
-    const points = vertices.map(vertex => vertex.join(',')).join(' ');
-    return {hue, points, zIndex};
+  handleClick() {
+    if (this.props.hp > 0) CarouselActions.hit(this.props.index);
   },
 
-  hit() {
+  containerStyle() {
+    return Object.assign({position: 'relative',
+                          zIndex: this.state.zIndex},
+                         this.props.style);
+  },
+
+  spinStyle() {
+    return {
+      transform: `rotate(${this.props.hp * 137}deg)`,
+      transition: `transform ${this.props.hp * 150}ms ${tweeners.friction}`
+    };
+  },
+
+  shrinkStyle() {
+    let transition;
     if (this.props.hp > 0) {
-      CarouselActions.hit(this.props.index);
+      transition = `all ${this.props.hp * 150}ms ${tweeners.bounce}`;
+    } else {
+      transition = 'all 75ms ease-in';
     }
+    return {
+      transform: `scale(${this.props.hp},${this.props.hp})`,
+      strokeWidth: 4 / this.props.hp,
+      transition: transition
+    }
+  },
+
+  polygonStyle() {
+    return {
+      fill: `hsl(${this.state.hue},100%,50%)`,
+      stroke: `hsl(${this.state.hue},100%,25%)`
+    };
   },
 
   render() {
-    const outerStyle = Object.assign({},
-                                     this.props.style,
-                                     {position: 'relative',
-                                      zIndex: this.state.zIndex
-                                    })
-
-    let shrink;
-    if (this.props.hp > 0) {
-      // bounce
-      shrink = `${this.props.hp * 150}ms cubic-bezier(.39,1.41,.93,1.13)`
-    } else {
-      shrink = '75ms ease-in'
-    }
-
-    return <div style={outerStyle}>
+    return <div style={this.containerStyle()}>
              <svg width="100%"
                   viewBox="-50 -50 100 100"
-                  style={{overflow: 'visible',
-                          transform: `rotate(${this.props.hp * 137}deg)`,
-                          transition: `transform ${this.props.hp * 150}ms cubic-bezier(0,.4,.4,1)`}}>
+                  style={Object.assign({overflow: 'visible'},
+                                       this.spinStyle())} >
                <polygon points={this.state.points}
-                        style={{fill: `hsl(${this.state.hue},100%,50%)`,
-                                transform: `scale(${this.props.hp},${this.props.hp})`,
-                                strokeWidth: 4/this.props.hp,
-                                stroke: `hsl(${this.state.hue},100%,25%)`,
-                                transition: `all ${shrink}`}}
-                        onClickCapture={this.hit} />
+                        style={Object.assign(this.polygonStyle(),
+                                             this.shrinkStyle())}
+                        onClickCapture={this.handleClick} />
              </svg>
            </div>;
   }
