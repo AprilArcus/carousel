@@ -227,10 +227,10 @@ export default React.createClass({
 
   endCapStyle() {                 // setting negative zIndex on the
     return {                      // carousel items would break their
-      [this.state.prefixes.get('flexShrink')]: 0, // onClick handlers, so we use
-      zIndex: 100                 // positive z-indices [0,20) there to
-    };                            // randomize their layer and
-  },                              // compensate for it here.
+      [this.state.prefixes.get('flexShrink')]: 0, // onClick handlers,
+      zIndex: 100                 // so we use positive z-indices [0,20)
+    };                            // there to randomize their layering
+  },                              // and compensate for it here.
 
   stockStyle() {
     return { // the stock is the reference for the slider and the 'game
@@ -359,16 +359,22 @@ export default React.createClass({
     const withIndices = this.state.items.toKeyedSeq()
                                         .map( (shape, storeIndex) =>
                                               [shape, storeIndex] );
-    // n.b. Immutable.Repeat returns an IndexedSeq
+    // n.b. Immutable.Repeat always returns an IndexedSeq
     const circularized = Immutable.Repeat(withIndices).flatten(1);
     const slice = circularized.slice(this.state.offsetIndex,
-                                     this.state.offsetIndex + this.props.numSlots + 4);
+                                     this.state.offsetIndex
+                                       + this.props.numSlots + 4);
     // now render them.
     const items = slice.map( ([shape, storeIndex], sliceIndex) =>
       // a unique and stable key avoids unecessary DOM operations. If we
       // didn't have padding, the storeIndex would be fine by itself,
       // but since some shapes will be rendered twice, we take extra
-      // care here.
+      // care here. There is still one indel per slide with this key,
+      // which wouldn't be necessary provided we aren't concerned about
+      // loss-of-precision errors (it would take 40 million years to
+      // overflow a 53-bit double precision float at 150ms per slide)
+      // but I'm immutable.js crashes node when I try to slice negative
+      // indices out of an infinite list, so we'll live with it.
       <Shape key={storeIndex + this.state.items.size *
                   Math.floor(sliceIndex / this.state.items.size)}
              index={storeIndex}

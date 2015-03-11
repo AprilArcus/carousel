@@ -8,8 +8,8 @@ import CarouselActions from '../actions/CarouselActions';
 // An ES6 transliteration of Mike Ounsworth's random polygon algorithm
 // c.f. http://stackoverflow.com/a/25276331
 /* eslint-disable no-extra-parens, camelcase */
-function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness,
-                       numVerts, rng) {
+function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
+                       spikeyness, numVerts, rng) {
   // nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
   // gauss is simplified for statelessness and possibly incorrect
