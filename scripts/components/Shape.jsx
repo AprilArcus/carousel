@@ -5,10 +5,11 @@ const PureRenderMixin = addons.PureRenderMixin;
 import seedrandom from 'seedrandom';
 import CarouselActions from '../actions/CarouselActions';
 
+// An ES6 transliteration of Mike Ounsworth's random polygon algorithm
+// c.f. http://stackoverflow.com/a/25276331
 /* eslint-disable no-extra-parens, camelcase */
-// An ES6 transliteration of Mike Ounsworth's random polygon
-// algorithm c.f. http://stackoverflow.com/a/25276331
-function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts, rng) {
+function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness,
+                       numVerts, rng) {
   // nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
   // gauss is simplified for statelessness and possibly incorrect
@@ -104,7 +105,12 @@ export default React.createClass({
   propTypes: {
     index: React.PropTypes.number.isRequired,
     seed: React.PropTypes.string.isRequired,
-    hp: React.PropTypes.number.isRequired
+    hp: React.PropTypes.number.isRequired,
+    transforms: React.PropTypes.string
+  },
+
+  getDefaultProps() {
+    return {transforms: 'standards'};
   },
 
   getInitialState() {
@@ -131,10 +137,16 @@ export default React.createClass({
   // shape's hitpoints, and also use hitpoints as a factor on transition
   // durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
-    return {
+    const spinStyle = {
       transform: `rotate(${this.props.hp * 137}deg)`,
-      transition: `transform ${this.props.hp * 150}ms ${tweeners.friction}`
+      transition: `all ${this.props.hp * 150}ms ${tweeners.friction}`
     };
+
+    if (this.props.transforms === 'webkit') {
+      spinStyle.WebkitTransform = spinStyle.transform;
+    }
+
+    return spinStyle;
   },
 
   shrinkStyle() {
@@ -147,11 +159,16 @@ export default React.createClass({
       // to zero!
       transition = 'all 75ms ease-in';
     }
-    return {
+    const shrinkStyle = {
       transform: `scale(${this.props.hp},${this.props.hp})`,
       strokeWidth: 4 / this.props.hp,
       transition: transition
     };
+    if (this.props.transforms === 'webkit') {
+      shrinkStyle.WebkitTransform = shrinkStyle.transform;
+    }
+
+    return shrinkStyle;
   },
 
   polygonStyle() {

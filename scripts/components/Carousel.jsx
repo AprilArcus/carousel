@@ -55,11 +55,33 @@ export default React.createClass({
     return {sliding: this.enums.sliding.STOPPED,
             offsetIndex: 0,
             genericInteractions: 0,
-            gameOver: false};
+            gameOver: false,
+            flex: 'standards',
+            transforms: 'standards'};
+  },
+
+  testFeatures() {
+    const testNode = document.createElement('div');
+    testNode.style.display = 'flex';
+    if (testNode.style.display !== 'flex') {
+      testNode.style.display = '-webkit-flex';
+      if (testNode.style.display === '-webkit-flex') {
+        this.webkitFlexFixUp();
+        this.setState({flex: 'webkit'});
+      }
+    }
+    testNode.style.transform = 'Garbage Data';
+    if (testNode.style.transform === 'Garbage Data') {
+      testNode.style.WebkitTransform = 'Garbage Data';
+      if (testNode.style.WebkitTransform !== 'Garbage Data') {
+        this.setState({transforms: 'webkit'});
+      }
+    }
   },
 
   componentDidMount() {
     CarouselStore.addChangeListener(this.onChange);
+    this.testFeatures();
     this.handleReset();
     // React's onKeyDown event only listens when the component or
     // a child has focus. This is certainly the right thing to do
@@ -197,14 +219,14 @@ export default React.createClass({
       flexGrow: 1,     // their layering and compensate for it here.
       display: 'flex',
       alignItems: 'center',
-      // position: 'relative', // the stock is the reference for the
-      position: 'absolute',    // slider and the 'game over' message.
-      top: 0,                  // when running at full bleed, it's
-      right: 0,                // aesthetically preferrable to use
-      bottom: 0,               // absolute positioning -- this
-      left: 0                  // effectively insets the endcaps.
-    },
-    slider: {
+      position: 'relative'     // the stock is the reference for the
+      // position: 'absolute', // slider and the 'game over' message.
+      // top: 0,               // when running at full bleed, it's
+      // right: 0,             // aesthetically preferrable to use
+      // bottom: 0,            // absolute positioning -- this
+      // left: 0               // effectively insets the endcaps.
+    },                         // However, this appears to trigger a
+    slider: {                  // rendering bug in Gecko.
       flexGrow: 1,
       position: 'relative', // we will calculate how much to offset the
       whiteSpace: 'nowrap'  // slider in sliderStyle()
@@ -269,6 +291,28 @@ export default React.createClass({
     }
   },
 
+  webkitFlexFixUp() {
+    this.styles.container.display = '-webkit-flex';
+    this.styles.container.WebkitAlignItems =
+      this.styles.container.alignItems;
+    this.styles.container.WebkitJustifyContent =
+      this.styles.container.justifyContent;
+    this.styles.endCap.WebkitFlexShrink =
+      this.styles.endCap.flexShrink;
+    this.styles.stock.WebkitFlexGrow =
+      this.styles.stock.flexGrow;
+    this.styles.stock.display = '-webkit-flex';
+    this.styles.stock.WebkitAlignItems =
+      this.styles.stock.alignItems;
+    this.styles.slider.WebkitFlexGrow =
+      this.styles.slider.flexGrow;
+    this.styles.messageContainer.display = '-webkit-flex';
+    this.styles.messageContainer.WebkitJustifyContent =
+      this.styles.messageContainer.justifyContent;
+    this.styles.messageContainer.WebkitAlignItems =
+      this.styles.messageContainer.alignItems;
+  },
+
   containerStyle() {
     return Object.assign({}, this.props.style, this.styles.container);
   },
@@ -277,10 +321,15 @@ export default React.createClass({
     let messageStyle;
     if (this.state.gameOver) {
       messageStyle = {transform: 'scale(1,1)',
-                      transition: 'transform 450ms cubic-bezier(.4,1.4,.4,1)'};
+                      transition: 'all 450ms cubic-bezier(.4,1.4,.4,1)'};
     } else {
       messageStyle = {transform: 'scale(0,0)', transition: 'none'};
     }
+
+    if (this.state.transforms === 'webkit') {
+      messageStyle.WebkitTransform = messageStyle.transform;
+    }
+
     return Object.assign({}, this.styles.message, messageStyle);
   },
 
@@ -328,7 +377,8 @@ export default React.createClass({
              index={storeIndex}
              style={this.itemStyle()}
              hp={shape.hp}
-             seed={shape.seed}/>);
+             seed={shape.seed}
+             transforms={this.state.transforms} />);
     return items.toArray(); // FIXME: React 0.13 will support custom
   },                        // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
