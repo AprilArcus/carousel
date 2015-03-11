@@ -56,7 +56,11 @@ export default React.createClass({
             offsetIndex: 0,
             genericInteractions: 0,
             gameOver: false,
-            flex: 'standards',
+            flex: 'flex',
+            flexShrink: 'flexShrink',
+            flexGrow: 'flexGrow',
+            alignItems: 'alignItems',
+            justifyContent: 'justifyContent',
             transform: 'transform'};
   },
 
@@ -65,8 +69,11 @@ export default React.createClass({
     if (testNode.style.display !== 'flex') {
       testNode.style.display = '-webkit-flex';
       if (testNode.style.display === '-webkit-flex') {
-        this.webkitFlexFixUp();
-        this.setState({flex: 'webkit'});
+        this.setState({flex: '-webkit-flex',
+                       flexShrink: 'WebkitFlexShrink',
+                       flexGrow: 'WebkitFlexGrow',
+                       alignItems: 'WebkitAlignItems',
+                       justifyContent: 'WebkitJustifyContent'});
       }
     }
     testNode.style.transform = 'Garbage Data';
@@ -124,15 +131,15 @@ export default React.createClass({
            event.keyCode === 0x41) && // a
          !(event.altKey || event.metaKey)) {
         this.slideBackward();
-        this.handleGenericInteraction();
         event.stopPropagation();
+        this.handleGenericInteraction(event);
       } else if ((event.keyCode === 0x27 ||  // right arrow
                   event.keyCode === 0x4C ||  // l
                   event.keyCode === 0x44) && // d
                 !(event.altKey || event.metaKey)) {
         this.slideForward();
-        this.handleGenericInteraction();
         event.stopPropagation();
+        this.handleGenericInteraction(event);
       }
     }
   },
@@ -195,60 +202,114 @@ export default React.createClass({
     this.setState({sliding: this.enums.sliding.STOPPED});
   },
 
-  // We store styles internally and apply them inline with JS. While
-  // heterodox, this gives us the freedom to calculate styles on the fly
-  // without using global classnames, and facilitates componentization.
+  // We generate most styles on the fly and use React to inline them.
+  // While heterodox, this gives us the freedom to calculate styles on
+  // the fly instead of adding and removing global classnames to apply
+  // precomputed effects, enables runtime feature detection, and
+  // facilitates componentization.
   //
   // c.f. Christopher Chedeau's terrific talk, "React: CSS in JS"
   // http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html
   // https://vimeo.com/channels/684289/116209150
-  styles: {
-    container: {
-      position: 'relative', // we'll position the reset and clear
-      display: 'flex',      // buttons relative to the outer div.
-      alignItems: 'center',
-      justifyContent: 'space-between',
+
+  containerStyle() {
+    const container = {
+      position: 'relative',     // we'll position the reset and clear
+      display: this.state.flex, // buttons relative to the outer div.
+      [this.state.alignItems]: 'center',
+      [this.state.justifyContent]: 'space-between',
       overflow: 'hidden',
       height: '100%' // occupy the full height of our parent rather than
-    },               // the natural height of the tallest carousel item.
-    endCap: {
-      flexShrink: 0,
-      zIndex: 100      // setting negative zIndex on the carousel items
-    },                 // would break their onClick handlers, so we use
-    stock: {           // positive indices [0,20) there to randomize
-      flexGrow: 1,     // their layering and compensate for it here.
-      display: 'flex',
-      alignItems: 'center',
-      position: 'relative'     // the stock is the reference for the
-      // position: 'absolute', // slider and the 'game over' message.
-      // top: 0,               // when running at full bleed, it's
-      // right: 0,             // aesthetically preferrable to use
-      // bottom: 0,            // absolute positioning -- this
-      // left: 0               // effectively insets the endcaps.
-    },                         // However, this triggers a rendering
-    slider: {                  // bug in Gecko.
-      flexGrow: 1,
-      position: 'relative', // we will calculate how much to offset the
-      whiteSpace: 'nowrap'  // slider in sliderStyle()
-    },
-    messageContainer: {
+    };               // the natural height of the tallest carousel item.
+    return Object.assign({}, this.props.style, container);
+  },
+
+  endCapStyle() {                 // setting negative zIndex on the
+    return {                      // carousel items would break their
+      [this.state.flexShrink]: 0, // onClick handlers, so we use
+      zIndex: 100                 // positive z-indices [0,20) there to
+    };                            // randomize their layer and
+  },                              // compensate for it here.
+
+  stockStyle() {
+    return {
+      [this.state.flexGrow]: 1,          // the stock is the reference
+      display: this.state.flex,          // for the slider and the 'game
+      [this.state.alignItems]: 'center', // over' message. when running
+      position: 'relative'               // at full bleed, it is
+      // position: 'absolute',           // aesthetically preferrable to
+      // top: 0,                         // absolute positioning -- this
+      // right: 0,                       // effectively insets the
+      // bottom: 0,                      // endcaps. However, doing so
+      // left: 0                         // triggers a rendering bug in
+    };                                   // Gecko. TODO: test case.
+  },
+
+  sliderStyle() {
+    const itemWidth = 100 / this.props.numSlots;
+    let left, transition;
+    switch(this.state.sliding) {
+      case this.enums.sliding.FORWARD:
+        left = `-${3 * itemWidth}%`;
+        transition = `left ${this.props.slideDuration}ms ease`;
+        break;
+      case this.enums.sliding.BACKWARD:
+        left = `-${1 * itemWidth}%`;
+        transition = `left ${this.props.slideDuration}ms ease`;
+        break;
+      default:
+        left = `-${2 * itemWidth}%`;
+        transition = 'none';
+    }
+    return {
+      [this.state.flexGrow]: 1,
+      position: 'relative',
+      left: left,
+      transition: transition,
+      whiteSpace: 'nowrap'
+    };
+  },
+
+  messageContainerStyle() {
+    return {
       position: 'absolute',
       top: 0,
       right: 0,
       bottom: 0,
       left: 0,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    message: {
+      display: [this.state.flex],
+      [this.state.justifyContent]: 'center',
+      [this.state.alignItems]: 'center'
+    };
+  },
+
+  messageStyle() {
+    let transform, transition;
+    if (this.state.gameOver) {
+      transform = 'scale(1,1)';
+      transition = 'all 450ms cubic-bezier(.4,1.4,.4,1)';
+    } else {
+      transform = 'scale(0,0)';
+      transition = 'none';
+    }
+    return {
       textAlign: 'center',
       fontSize: 50,
-      fontWeight: 100
-    },
-    item: {
-      display: 'inline-block'
-    },
+      fontWeight: 100,
+      [this.state.transform]: transform,
+      transition: transition
+    };
+  },
+
+  itemStyle() {
+    const itemWidth = 100 / this.props.numSlots;
+    return {
+      display: 'inline-block',
+      width: `${itemWidth}%`
+    };
+  },
+
+  staticStyles: {
     leftArrow: {
       margin: 10,
       width: 0,
@@ -291,73 +352,6 @@ export default React.createClass({
     }
   },
 
-  webkitFlexFixUp() {
-    // FIXME: mutating the styles object in this way breaks
-    // react-hot-loader in Safari -- it will re-initialize the styles
-    // object to its lexically defined state without triggering the
-    // componentDidMount() -> detectFeatures() -> webkitFlexFixUp()
-    // call stack. The workaround would be to make all the effected
-    // styles into function calls.
-    this.styles.container.display = '-webkit-flex';
-    this.styles.container.WebkitAlignItems =
-      this.styles.container.alignItems;
-    this.styles.container.WebkitJustifyContent =
-      this.styles.container.justifyContent;
-    this.styles.endCap.WebkitFlexShrink =
-      this.styles.endCap.flexShrink;
-    this.styles.stock.WebkitFlexGrow =
-      this.styles.stock.flexGrow;
-    this.styles.stock.display = '-webkit-flex';
-    this.styles.stock.WebkitAlignItems =
-      this.styles.stock.alignItems;
-    this.styles.slider.WebkitFlexGrow =
-      this.styles.slider.flexGrow;
-    this.styles.messageContainer.display = '-webkit-flex';
-    this.styles.messageContainer.WebkitJustifyContent =
-      this.styles.messageContainer.justifyContent;
-    this.styles.messageContainer.WebkitAlignItems =
-      this.styles.messageContainer.alignItems;
-  },
-
-  containerStyle() {
-    return Object.assign({}, this.props.style, this.styles.container);
-  },
-
-  messageStyle() {
-    let messageStyle;
-    if (this.state.gameOver) {
-      messageStyle = {[this.state.transform]: 'scale(1,1)',
-                      transition: 'all 450ms cubic-bezier(.4,1.4,.4,1)'};
-    } else {
-      messageStyle = {[this.state.transform]: 'scale(0,0)',
-                      transition: 'none'};
-    }
-    return Object.assign({}, this.styles.message, messageStyle);
-  },
-
-  sliderStyle() {
-    const itemWidth = 100 / this.props.numSlots;
-    let slidingStyle;
-    switch(this.state.sliding) {
-      case this.enums.sliding.FORWARD:
-        slidingStyle = {left: `-${3 * itemWidth}%`,
-                        transition: `left ${this.props.slideDuration}ms ease`};
-        break;
-      case this.enums.sliding.BACKWARD:
-        slidingStyle = {left: `-${1 * itemWidth}%`,
-                        transition: `left ${this.props.slideDuration}ms ease`};
-        break;
-      default:
-        slidingStyle = {left: `-${2 * itemWidth}%`, transition: 'none'};
-    }
-    return Object.assign({}, this.styles.slider, slidingStyle);
-  },
-
-  itemStyle() {
-    const itemWidth = 100 / this.props.numSlots;
-    return Object.assign({}, this.styles.item, {width: `${itemWidth}%`});
-  },
-
   renderItems() {
     // Fetch the items we need. We grab four extra (two on each side)
     // to mitigate pop-in.
@@ -392,18 +386,18 @@ export default React.createClass({
 
     return <div style={this.containerStyle()}
                 onClick={this.handleGenericInteraction}>
-             <div style={this.styles.endCap}>
+             <div style={this.endCapStyle()}>
                <input type="button"
-                      style={this.styles.leftArrow}
+                      style={this.staticStyles.leftArrow}
                       disabled={this.state.sliding !==
                                 this.enums.sliding.STOPPED}
                       onClick={this.slideBackward} />
              </div>
-             <div style={this.styles.stock}>
+             <div style={this.stockStyle()}>
                <div style={this.sliderStyle()}>
                  {this.renderItems()}
                </div>
-               <div style={this.styles.messageContainer}>
+               <div style={this.messageContainerStyle()}>
                  <span style={this.messageStyle()}>
                    {'Thanks for Playing!'}
                    <br />
@@ -411,20 +405,20 @@ export default React.createClass({
                  </span>
                </div>
              </div>
-             <div style={this.styles.endCap}>
+             <div style={this.endCapStyle()}>
                <input type="button"
-                      style={this.styles.rightArrow}
+                      style={this.staticStyles.rightArrow}
                       disabled={this.state.sliding !==
                                 this.enums.sliding.STOPPED}
                       onClick={this.slideForward} />
              </div>
-             <div style={this.styles.buttonGroup}>
+             <div style={this.staticStyles.buttonGroup}>
                <input type="button"
-                      style={this.styles.button}
+                      style={this.staticStyles.button}
                       value="Reset"
                       onClick={this.handleReset} />
                <input type="button"
-                      style={this.styles.button}
+                      style={this.staticStyles.button}
                       value="Clear"
                       disabled={this.state.gameOver}
                       onClick={this.handleClear} />
