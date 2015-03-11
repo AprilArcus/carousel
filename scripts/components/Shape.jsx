@@ -5,9 +5,8 @@ const PureRenderMixin = addons.PureRenderMixin;
 import seedrandom from 'seedrandom';
 import CarouselActions from '../actions/CarouselActions';
 
-// An ES6 transliteration of Mike Ounsworth's random polygon algorithm
+// An ES6 translation of Mike Ounsworth's random polygon algorithm
 // c.f. http://stackoverflow.com/a/25276331
-/* eslint-disable no-extra-parens, camelcase */
 function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
                        spikeyness, numVerts, rng) {
   // nonce implementations of a few functions from Python's random.py
@@ -24,6 +23,15 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   }
   function clip(n, min, max) {
     return n < min ? min : n > max ? max : n;
+  }
+  // an optimized reductions (clojure) / scanl (haskell) function
+  function reductions(callback, initial, array) {
+    let result = new Array(array.length + 1);
+    result[0] = initial;
+    array.forEach( (element, index) =>
+      result[index + 1] = callback(result[index], element)
+    );
+    return result;
   }
 
   // Start with the centre of the polygon at ctrX, ctrY, then creates
@@ -51,35 +59,28 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   spikeyness = clip(spikeyness, 0, 1) * aveRadius;
 
   // generate n angle steps
-  const angleSteps = [];
   const lower = (2 * Math.PI / numVerts) - irregularity;
   const upper = (2 * Math.PI / numVerts) + irregularity;
-  let sum = 0;
-  for (let i = 0; i < numVerts; ++i) {
-    const tmp = uniform(lower, upper);
-    angleSteps.push(tmp);
-    sum = sum + tmp;
-  }
+  const angleSteps = Array.from(Array(numVerts), () => uniform(lower, upper));
+  const sum = angleSteps.reduce((x, y) => x + y, 0);
 
   // normalize the steps so that point 0 and point n+1 are the same
   const k = sum / (2 * Math.PI);
-  for (let i = 0; i < numVerts; ++i) {
-    angleSteps[i] = angleSteps[i] / k;
-  }
+  const normalizedAngleSteps = angleSteps.map(e => e / k);
 
   // now generate the points
-  const points = [];
-  let angle = uniform(0, 2 * Math.PI);
-  for (let i = 0; i < numVerts; ++i) {
-    const r_i = clip( gauss(aveRadius, spikeyness), 0, 2 * aveRadius);
-    const x = ctrX + r_i * Math.cos(angle);
-    const y = ctrY + r_i * Math.sin(angle);
-    points.push( [Math.round(x), Math.round(y)] );
-    angle = angle + angleSteps[i];
-  }
+  const angles = reductions((x, y) => x + y,
+                            uniform(0, 2 * Math.PI),
+                            normalizedAngleSteps);
+  const points = angles.slice(0, -1).map(angle => {
+    const radius = clip( gauss(aveRadius, spikeyness), 0, 2 * aveRadius);
+    const x = ctrX + radius * Math.cos(angle);
+    const y = ctrY + radius * Math.sin(angle);
+    return [Math.round(x), Math.round(y)];
+  });
 
   return points;
-}                         /* eslint-enable no-extra-parens, camelcase */
+}
 
 function generateRandomPolygonFromSeed(seed) {
   const rng = seedrandom(seed);
