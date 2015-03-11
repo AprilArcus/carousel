@@ -8,6 +8,7 @@ import CarouselActions from '../actions/CarouselActions';
 function clip(n, min, max) {
   return n < min ? min : n > max ? max : n;
 }
+
 // an optimized reductions (clojure) / scanl (haskell) function
 function reductions(callback, initial, array) {
   let result = new Array(array.length + 1);
@@ -109,12 +110,7 @@ export default React.createClass({
   propTypes: {
     index: React.PropTypes.number.isRequired,
     seed: React.PropTypes.string.isRequired,
-    hp: React.PropTypes.number.isRequired,
-    transform: React.PropTypes.string
-  },
-
-  getDefaultProps() {
-    return {transform: 'transform'};
+    hp: React.PropTypes.number.isRequired
   },
 
   getInitialState() {
@@ -142,7 +138,7 @@ export default React.createClass({
   // durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
     return {
-      [this.props.transform]: `rotate(${this.props.hp * 137}deg)`,
+      [this.props.prefixes.get('transform')]: `rotate(${this.props.hp * 137}deg)`,
       transition: `all ${this.props.hp * 150}ms ${tweeners.friction}`
     };
   },
@@ -158,7 +154,7 @@ export default React.createClass({
       transition = 'all 75ms ease-in';
     }
     return {
-      [this.props.transform]: `scale(${this.props.hp},${this.props.hp})`,
+      [this.props.prefixes.get('transform')]: `scale(${this.props.hp},${this.props.hp})`,
       strokeWidth: 4 / this.props.hp,
       transition: transition
     };

@@ -381,7 +381,7 @@ export default React.createClass({
              style={this.itemStyle()}
              hp={shape.hp}
              seed={shape.seed}
-             transform={this.state.prefixes.get('transform')} />);
+             prefixes={this.state.prefixes} />);
     return items.toArray(); // FIXME: React 0.13 will support custom
   },                        // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
