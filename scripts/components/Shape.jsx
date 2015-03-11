@@ -65,7 +65,8 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   // generate n angle steps
   const lower = (2 * Math.PI / numVerts) - irregularity;
   const upper = (2 * Math.PI / numVerts) + irregularity;
-  const angleSteps = Array.from(Array(numVerts), () => uniform(lower, upper));
+  const angleSteps = Array.from(Array(numVerts),
+                                () => uniform(lower, upper));
   const sum = angleSteps.reduce((x, y) => x + y, 0);
 
   // normalize the steps so that point 0 and point n+1 are the same
@@ -77,7 +78,7 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
                             uniform(0, 2 * Math.PI),
                             normalizedAngleSteps);
   const points = angles.slice(0, -1).map(angle => {
-    const radius = clip( gauss(aveRadius, spikeyness), 0, 2 * aveRadius);
+    const radius = clip(gauss(aveRadius, spikeyness), 0, 2 * aveRadius);
     const x = ctrX + radius * Math.cos(angle);
     const y = ctrY + radius * Math.sin(angle);
     return [Math.round(x), Math.round(y)];
@@ -113,6 +114,12 @@ export default React.createClass({
     hp: React.PropTypes.number.isRequired
   },
 
+  getDefaultProps() {
+    return {
+      prefixes: {transform: 'transform'}
+    };
+  },
+
   getInitialState() {
     return generateRandomPolygonFromSeed(this.props.seed);
   },
@@ -138,7 +145,7 @@ export default React.createClass({
   // durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
     return {
-      [this.props.prefixes.get('transform')]: `rotate(${this.props.hp * 137}deg)`,
+      [this.props.prefixes.transform]: `rotate(${this.props.hp * 137}deg)`,
       transition: `all ${this.props.hp * 150}ms ${tweeners.friction}`
     };
   },
@@ -154,7 +161,8 @@ export default React.createClass({
       transition = 'all 75ms ease-in';
     }
     return {
-      [this.props.prefixes.get('transform')]: `scale(${this.props.hp},${this.props.hp})`,
+      [this.props.prefixes.transform]:
+        `scale(${this.props.hp},${this.props.hp})`,
       strokeWidth: 4 / this.props.hp,
       transition: transition
     };

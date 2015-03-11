@@ -33,11 +33,20 @@ export default React.createClass({
   },
 
   getDefaultProps() {
-    return {numItems: 6,
-            numSlots: 6,
-            respawnThreshold: 12,
-            slideDuration: 150,
-            fullscreen: false};
+    return {
+      numItems: 6,
+      numSlots: 6,
+      respawnThreshold: 12,
+      slideDuration: 150,
+      fullscreen: false,
+      prefixes: {
+        flex: 'flex',
+        flexShrink: 'flexShrink',
+        flexGrow: 'flexGrow',
+        alignItems: 'alignItems',
+        justifyContent: 'justifyContent',
+        transform: 'transform'}
+    };
   },
 
   enums: {
@@ -53,21 +62,12 @@ export default React.createClass({
       sliding: this.enums.sliding.STOPPED,
       offsetIndex: 0,
       genericInteractions: 0,
-      gameOver: false,
-      prefixes: Immutable.Map({
-        flex: 'flex',
-        flexShrink: 'flexShrink',
-        flexGrow: 'flexGrow',
-        alignItems: 'alignItems',
-        justifyContent: 'justifyContent',
-        transform: 'transform' })
+      gameOver: false
     };
   },
 
   componentDidMount() {
     CarouselStore.addChangeListener(this.onChange);
-    const testNode = document.createElement('div');
-    this.detectFeatures(testNode);
     this.handleReset();
     // React's onKeyDown event only listens when the component or
     // a child has focus. This is certainly the right thing to do
@@ -190,35 +190,12 @@ export default React.createClass({
   // http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html
   // https://vimeo.com/channels/684289/116209150
 
-  detectFeatures(testNode) {
-    let prefixes = {};
-    testNode.style.display = 'flex';
-    if (testNode.style.display !== 'flex') {
-      testNode.style.display = '-webkit-flex';
-      if (testNode.style.display === '-webkit-flex') {
-        prefixes.flex = '-webkit-flex';
-        prefixes.flexShrink = 'WebkitFlexShrink';
-        prefixes.flexGrow = 'WebkitFlexGrow';
-        prefixes.alignItems = 'WebkitAlignItems';
-        prefixes.justifyContent = 'WebkitJustifyContent';
-      }
-    }
-    testNode.style.transform = 'Garbage Data';
-    if (testNode.style.transform === 'Garbage Data') {
-      testNode.style.WebkitTransform = 'Garbage Data';
-      if (testNode.style.WebkitTransform !== 'Garbage Data') {
-        prefixes.transform = 'WebkitTransform';
-      }
-    }
-    this.setState({prefixes: this.state.prefixes.merge(prefixes)});
-  },
-
   containerStyle() {
     const container = {     // we'll position the reset and clear
       position: 'relative', // buttons relative to the outer div.
-      display: this.state.prefixes.get('flex'),
-      [this.state.prefixes.get('alignItems')]: 'center',
-      [this.state.prefixes.get('justifyContent')]: 'space-between',
+      display: this.props.prefixes.flex,
+      [this.props.prefixes.alignItems]: 'center',
+      [this.props.prefixes.justifyContent]: 'space-between',
       overflow: 'hidden',
       height: '100%' // occupy the full height of our parent rather than
     };               // the natural height of the tallest carousel item.
@@ -227,22 +204,22 @@ export default React.createClass({
 
   endCapStyle() {                 // setting negative zIndex on the
     return {                      // carousel items would break their
-      [this.state.prefixes.get('flexShrink')]: 0, // onClick handlers,
-      zIndex: 100                 // so we use positive z-indices [0,20)
-    };                            // there to randomize their layering
-  },                              // and compensate for it here.
+      [this.props.prefixes.flexShrink]: 0, // onClick handlers, so we
+      zIndex: 100                 // use positive z-indices [0,20) there
+    };                            // to randomize their layering and
+  },                              // compensate for it here.
 
   stockStyle() {
     return { // the stock is the reference for the slider and the 'game
-      [this.state.prefixes.get('flexGrow')]: 1, // over' message. when
-      display: this.state.prefixes.get('flex'), // running at full bleed
-      [this.state.prefixes.get('alignItems')]: 'center', // it is
-      position: 'relative'               // aesthetically preferrable to
-      // position: 'absolute',           // use absolute positioning --
-      // top: 0,                         // this effectively insets the
-      // right: 0,                       // endcaps. However, doing so
-      // bottom: 0,                      // triggers a rendering bug in
-      // left: 0                         // Gecko. TODO: make minimal
+      [this.props.prefixes.flexGrow]: 1, // over' message. when
+      display: this.props.prefixes.flex, // running at full bleed
+      [this.props.prefixes.alignItems]: 'center', // it is aesthetically
+      position: 'relative'               // preferrable to use absolute
+      // position: 'absolute',           // positioning -- this effec-
+      // top: 0,                         // tively insets the endcaps.
+      // right: 0,                       // However, doing so triggers a
+      // bottom: 0,                      // rendering bug in Gecko.
+      // left: 0                         // TODO: make minimal
     };                                   // test case, file bug.
   },
 
@@ -263,7 +240,7 @@ export default React.createClass({
         transition = 'none';
     }
     return {
-      [this.state.prefixes.get('flexGrow')]: 1,
+      [this.props.prefixes.flexGrow]: 1,
       position: 'relative',
       left: left,
       transition: transition,
@@ -278,9 +255,9 @@ export default React.createClass({
       right: 0,
       bottom: 0,
       left: 0,
-      display: [this.state.prefixes.get('flex')],
-      [this.state.prefixes.get('justifyContent')]: 'center',
-      [this.state.prefixes.get('alignItems')]: 'center'
+      display: [this.props.prefixes.flex],
+      [this.props.prefixes.justifyContent]: 'center',
+      [this.props.prefixes.alignItems]: 'center'
     };
   },
 
@@ -288,7 +265,7 @@ export default React.createClass({
     let transform, transition;
     if (this.state.gameOver) {
       transform = 'scale(1,1)';
-      transition = 'all 450ms cubic-bezier(.4,1.4,.4,1)';
+      transition = 'all 450ms cubic-bezier(0.4,1.4,0.4,1.0)';
     } else {
       transform = 'scale(0,0)';
       transition = 'none';
@@ -297,7 +274,7 @@ export default React.createClass({
       textAlign: 'center',
       fontSize: 50,
       fontWeight: 100,
-      [this.state.prefixes.get('transform')]: transform,
+      [this.props.prefixes.transform]: transform,
       transition: transition
     };
   },
@@ -354,34 +331,34 @@ export default React.createClass({
   },
 
   renderItems() {
-    // Fetch the items we need. We grab four extra (two on each side)
-    // to mitigate pop-in.
+    // Fetch the items we need...
     const withIndices = this.state.items.toKeyedSeq()
                                         .map( (shape, storeIndex) =>
                                               [shape, storeIndex] );
-    // n.b. Immutable.Repeat always returns an IndexedSeq
+    // (n.b. Immutable.Repeat always returns an IndexedSeq)
     const circularized = Immutable.Repeat(withIndices).flatten(1);
+    // (we grab four extra -- two on each side -- to mitigate pop-in)
     const slice = circularized.slice(this.state.offsetIndex,
                                      this.state.offsetIndex
                                        + this.props.numSlots + 4);
-    // now render them.
+    // ...and render them:
     const items = slice.map( ([shape, storeIndex], sliceIndex) =>
       // a unique and stable key avoids unecessary DOM operations. If we
       // didn't have padding, the storeIndex would be fine by itself,
       // but since some shapes will be rendered twice, we take extra
-      // care here. There is still one indel per slide with this key,
+      // care here. There is still one in/del per slide with this key,
       // which wouldn't be necessary provided we aren't concerned about
       // loss-of-precision errors (it would take 40 million years to
-      // overflow a 53-bit double precision float at 150ms per slide)
-      // but I'm immutable.js crashes node when I try to slice negative
-      // indices out of an infinite list, so we'll live with it.
+      // lose integer precision on a double precision float at 150ms per
+      // slide) but I'm immutable.js crashes node when I try to slice
+      // negative indices out of an infinite list, so we'll live with it.
       <Shape key={storeIndex + this.state.items.size *
                   Math.floor(sliceIndex / this.state.items.size)}
              index={storeIndex}
              style={this.itemStyle()}
              hp={shape.hp}
              seed={shape.seed}
-             prefixes={this.state.prefixes} />);
+             prefixes={this.props.prefixes} />);
     return items.toArray(); // FIXME: React 0.13 will support custom
   },                        // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
