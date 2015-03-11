@@ -137,7 +137,7 @@ export default React.createClass({
     }
   },
 
-  handleGenericInteraction() {
+  handleGenericInteraction(event) {
     this.setState({genericInteractions: this.state.genericInteractions + 1});
     if (this.state.genericInteractions % this.props.respawnThreshold === 0) {
       CarouselActions.respawn();
