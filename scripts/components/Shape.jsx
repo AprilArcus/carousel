@@ -1,7 +1,6 @@
 /* eslint-env es6, node */
 import React from 'react';
-import { addons } from 'react/addons';
-const PureRenderMixin = addons.PureRenderMixin;
+import { PureRenderMixin } from 'react/addons';
 import seedrandom from 'seedrandom';
 import CarouselActions from '../actions/CarouselActions';
 

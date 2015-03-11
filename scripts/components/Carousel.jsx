@@ -1,6 +1,6 @@
 /* eslint-env es6, node */
 import React from 'react';
-// import { addons } from 'react/addons';
+import { PureRenderMixin } from 'react/addons';
 import keyMirror from 'react/lib/keyMirror';
 import Immutable from 'immutable';
 import Shape from './Shape';
@@ -9,11 +9,10 @@ import CarouselActions from '../actions/CarouselActions';
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 
 export default React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+  mixins: [PureRenderMixin],
 
   propTypes: {
     respawnThreshold: React.PropTypes.number,
-    slideDuration: React.PropTypes.number,
     numItems: React.PropTypes.number,
     numSlots: function(props, propName, componentName) {
       function rangeCheck(props, propName, componentName) { //eslint-disable-line no-shadow, no-unused-vars
@@ -218,16 +217,17 @@ export default React.createClass({
   },
 
   sliderStyle() {
+    const slideDuration = '150ms';
     const itemWidth = 100 / this.props.numSlots;
     let left, transition;
     switch(this.state.sliding) {
       case this.enums.sliding.FORWARD:
         left = `-${3 * itemWidth}%`;
-        transition = `left ${this.props.slideDuration}ms ease`;
+        transition = `left ${slideDuration} ease`;
         break;
       case this.enums.sliding.BACKWARD:
         left = `-${1 * itemWidth}%`;
-        transition = `left ${this.props.slideDuration}ms ease`;
+        transition = `left ${slideDuration} ease`;
         break;
       default:
         left = `-${2 * itemWidth}%`;
