@@ -40,5 +40,4 @@ Object.assign(prefixes, vendorPrefixes);
 React.render(<Carousel numSlots={6}
                        numItems={7}
                        respawnThreshold={12}
-                       slideDuration={150}
                        prefixes={prefixes} />, document.getElementById('carousel'));

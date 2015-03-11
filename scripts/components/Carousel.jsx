@@ -1,15 +1,15 @@
 /* eslint-env es6, node */
 import React from 'react';
-import { addons } from 'react/addons';
-const PureRenderMixin = addons.PureRenderMixin;
+// import { addons } from 'react/addons';
 import keyMirror from 'react/lib/keyMirror';
 import Immutable from 'immutable';
 import Shape from './Shape';
 import CarouselStore from '../stores/CarouselStore';
 import CarouselActions from '../actions/CarouselActions';
+import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 
 export default React.createClass({
-  mixins: [PureRenderMixin],
+  mixins: [React.addons.PureRenderMixin],
 
   propTypes: {
     respawnThreshold: React.PropTypes.number,
@@ -68,7 +68,13 @@ export default React.createClass({
 
   componentDidMount() {
     CarouselStore.addChangeListener(this.onChange);
-    this.handleReset();
+    CarouselActions.reset(this.props.numItems);
+
+    // TODO: getDOMNode() is deprecated in React 0.13
+    // const sliderNode = React.findDOMNode(this.refs.slider);    // 0.13
+    const sliderNode = this.getDOMNode().children[1].children[0]; // 0.12
+    ReactTransitionEvents.addEndEventListener(sliderNode, this.stopSlide);
+
     // React's onKeyDown event only listens when the component or
     // a child has focus. This is certainly the right thing to do
     // in general (what if we have multiple of these carousel
@@ -82,6 +88,12 @@ export default React.createClass({
 
   componentWillUnmount() {
     CarouselStore.removeChangeListener(this.onChange);
+
+    // TODO: getDOMNode() is deprecated in React 0.13
+    // const sliderNode = React.findDOMNode(this.refs.slider);    // 0.13
+    const sliderNode = this.getDOMNode().children[1].children[0]; // 0.12
+    ReactTransitionEvents.removeEndEventListener(sliderNode, this.stopSlide);
+
     window.removeEventListener('keydown', this.handleKeyDown);
   },
 
@@ -143,28 +155,10 @@ export default React.createClass({
 
   slideBackward() {
     this.setState({sliding: this.enums.sliding.BACKWARD});
-    // Listening for transitionEnd events is unreliable across browsers
-    // and not yet supported by the React public API.
-    //
-    // c.f. https://github.com/facebook/react/blob/master/src/addons/transitions/ReactTransitionEvents.js
-    //      https://github.com/twbs/bootstrap/blob/master/js/transition.js
-    //
-    // We could add a listener to the DOM by hand, with a call to an
-    // undocumented API, like so:
-    //
-    // componentDidMount() {
-    //   ReactTransitionEvents.addEndEventListener(getSliderDOMNode(),
-    //                                             this.stopSlide());
-    // }
-    //
-    // but we would still need to call setTimeout as a backup and to
-    // support older browsers, so for now we opt for parsimony.
-    window.setTimeout(this.stopSlide, this.props.slideDuration);
   },
 
   slideForward() {
     this.setState({sliding: this.enums.sliding.FORWARD});
-    window.setTimeout(this.stopSlide, this.props.slideDuration);
   },
 
   stopSlide() {
@@ -350,8 +344,8 @@ export default React.createClass({
       // which wouldn't be necessary provided we aren't concerned about
       // loss-of-precision errors (it would take 40 million years to
       // lose integer precision on a double precision float at 150ms per
-      // slide) but I'm immutable.js crashes node when I try to slice
-      // negative indices out of an infinite list, so we'll live with it.
+      // slide) but immutable.js crashes node when I try to slice neg-
+      // ative indices out of an infinite list, so we'll live with it.
       <Shape key={storeIndex + this.state.items.size *
                   Math.floor(sliceIndex / this.state.items.size)}
              index={storeIndex}
@@ -378,7 +372,7 @@ export default React.createClass({
                       onClick={this.slideBackward} />
              </div>
              <div style={this.stockStyle()}>
-               <div style={this.sliderStyle()}>
+               <div ref="slider" style={this.sliderStyle()}>
                  {this.renderItems()}
                </div>
                <div style={this.messageContainerStyle()}>
