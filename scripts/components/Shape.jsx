@@ -106,11 +106,11 @@ export default React.createClass({
     index: React.PropTypes.number.isRequired,
     seed: React.PropTypes.string.isRequired,
     hp: React.PropTypes.number.isRequired,
-    transforms: React.PropTypes.string
+    transform: React.PropTypes.string
   },
 
   getDefaultProps() {
-    return {transforms: 'standards'};
+    return {transform: 'transform'};
   },
 
   getInitialState() {
@@ -137,16 +137,10 @@ export default React.createClass({
   // shape's hitpoints, and also use hitpoints as a factor on transition
   // durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
-    const spinStyle = {
-      transform: `rotate(${this.props.hp * 137}deg)`,
+    return {
+      [this.props.transform]: `rotate(${this.props.hp * 137}deg)`,
       transition: `all ${this.props.hp * 150}ms ${tweeners.friction}`
     };
-
-    if (this.props.transforms === 'webkit') {
-      spinStyle.WebkitTransform = spinStyle.transform;
-    }
-
-    return spinStyle;
   },
 
   shrinkStyle() {
@@ -159,16 +153,11 @@ export default React.createClass({
       // to zero!
       transition = 'all 75ms ease-in';
     }
-    const shrinkStyle = {
-      transform: `scale(${this.props.hp},${this.props.hp})`,
+    return {
+      [this.props.transform]: `scale(${this.props.hp},${this.props.hp})`,
       strokeWidth: 4 / this.props.hp,
       transition: transition
     };
-    if (this.props.transforms === 'webkit') {
-      shrinkStyle.WebkitTransform = shrinkStyle.transform;
-    }
-
-    return shrinkStyle;
   },
 
   polygonStyle() {

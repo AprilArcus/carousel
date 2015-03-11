@@ -57,7 +57,7 @@ export default React.createClass({
             genericInteractions: 0,
             gameOver: false,
             flex: 'standards',
-            transforms: 'standards'};
+            transform: 'transform'};
   },
 
   detectFeatures(testNode) {
@@ -73,7 +73,7 @@ export default React.createClass({
     if (testNode.style.transform === 'Garbage Data') {
       testNode.style.WebkitTransform = 'Garbage Data';
       if (testNode.style.WebkitTransform !== 'Garbage Data') {
-        this.setState({transforms: 'webkit'});
+        this.setState({transform: 'WebkitTransform'});
       }
     }
   },
@@ -326,13 +326,11 @@ export default React.createClass({
   messageStyle() {
     let messageStyle;
     if (this.state.gameOver) {
-      messageStyle = {transform: 'scale(1,1)',
+      messageStyle = {[this.state.transform]: 'scale(1,1)',
                       transition: 'all 450ms cubic-bezier(.4,1.4,.4,1)'};
     } else {
-      messageStyle = {transform: 'scale(0,0)', transition: 'none'};
-    }
-    if (this.state.transforms === 'webkit') {
-      messageStyle.WebkitTransform = messageStyle.transform;
+      messageStyle = {[this.state.transform]: 'scale(0,0)',
+                      transition: 'none'};
     }
     return Object.assign({}, this.styles.message, messageStyle);
   },
@@ -382,7 +380,7 @@ export default React.createClass({
              style={this.itemStyle()}
              hp={shape.hp}
              seed={shape.seed}
-             transforms={this.state.transforms} />);
+             transform={this.state.transform} />);
     return items.toArray(); // FIXME: React 0.13 will support custom
   },                        // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
