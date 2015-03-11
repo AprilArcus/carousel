@@ -8,14 +8,15 @@
   "author": "April Arcus <april.arcus@gmail.com> (http://github.com/aprilarcus)",
   "license": "MIT",
   "devDependencies": {
+    "babel": "^4.7.8",
     "babel-loader": "^4.1.0",
-    "react-hot-loader": "^1.1.1",
-    "webpack": "^1.7.0",
-    "webpack-dev-server": "1.6.4"
+    "react-hot-loader": "^1.2.1",
+    "webpack": "^1.7.2",
+    "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
-    "babel-runtime": "^4.7.3",
-    "react": "^0.12.0",
+    "babel-runtime": "4.7.3",
+    "react": "^0.12.2",
     "flux": "^2.0.1",
     "immutable": "^3.6.4",
     "seedrandom": "^2.3.11"
