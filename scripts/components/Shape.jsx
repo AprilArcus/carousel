@@ -121,11 +121,14 @@ export default React.createClass({
   },
 
   containerStyle() {
-    return Object.assign({position: 'relative',
-                          zIndex: this.state.zIndex},
-                         this.props.style);
+    return Object.assign({position: 'relative',       // only positioned
+                          zIndex: this.state.zIndex}, // elements can
+                         this.props.style);           // have z-index
   },
 
+  // In this and the follow function, we scale up in proportion to the
+  // shape's hitpoints, and also use hitpoints as a factor on transition
+  // durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
     return {
       transform: `rotate(${this.props.hp * 137}deg)`,
@@ -136,8 +139,11 @@ export default React.createClass({
   shrinkStyle() {
     let transition;
     if (this.props.hp > 0) {
+      // a little overshoot at the end of this animation looks nice...
       transition = `all ${this.props.hp * 150}ms ${tweeners.bounce}`;
     } else {
+      // ...but we don't want to turn ourselves inside-out when we scale
+      // to zero!
       transition = 'all 75ms ease-in';
     }
     return {
