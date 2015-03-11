@@ -15,7 +15,7 @@
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
-    "babel-runtime": "4.7.3",
+    "babel-runtime": "^4.7.8",
     "react": "^0.12.2",
     "flux": "^2.0.1",
     "immutable": "^3.6.4",

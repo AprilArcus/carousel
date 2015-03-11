@@ -1,5 +1,4 @@
-'use strict';
-
+/* eslint-env es6, node */
 const AppDispatcher = require('../dispatcher/AppDispatcher');
 const CarouselConstants = require('../constants/CarouselConstants');
 

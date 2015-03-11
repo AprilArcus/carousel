@@ -1,5 +1,4 @@
-'use strict';
-
+/* eslint-env es6, node */
 const keyMirror = require('react/lib/keyMirror');
 
 export default keyMirror({

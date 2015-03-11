@@ -1,16 +1,16 @@
-'use strict';
-
+/* eslint-env es6, node */
 const React = require('react');
 const PureRenderMixin = require('react/addons').addons.PureRenderMixin;
 const seedrandom = require('seedrandom');
 const CarouselActions = require('../actions/CarouselActions');
 
+/* eslint-disable no-extra-parens, camelcase */
 // An ES6 transliteration of Mike Ounsworth's random polygon
 // algorithm c.f. http://stackoverflow.com/a/25276331
 function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts, rng) {
   // nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
-  // gauss is simplified for statelessness and probably incorrect
+  // gauss is simplified for statelessness and possibly incorrect
   function gauss(mu, sigma) {
     const x2pi = rng() * Math.PI * 2;
     const g2rad = Math.sqrt(-2 * Math.log(1.0 - rng()));
@@ -78,6 +78,7 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity, spikeyness, numVerts
 
   return points;
 }
+/* eslint-enable no-extra-parens, camelcase */
 
 function generateRandomPolygonFromSeed(seed) {
   const rng = seedrandom(seed);
@@ -150,7 +151,7 @@ export default React.createClass({
       transform: `scale(${this.props.hp},${this.props.hp})`,
       strokeWidth: 4 / this.props.hp,
       transition: transition
-    }
+    };
   },
 
   polygonStyle() {

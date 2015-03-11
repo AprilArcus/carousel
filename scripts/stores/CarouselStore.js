@@ -1,5 +1,5 @@
-'use strict';
-
+/* eslint-env es6, node */
+/* eslint-disable no-underscore-dangle */
 const AppDispatcher = require('../dispatcher/AppDispatcher');
 const EventEmitter = require('events').EventEmitter;
 const CarouselConstants = require('../constants/CarouselConstants');
@@ -31,8 +31,8 @@ function respawn() {
   const candidateIndices = _shapes.toKeyedSeq()
                                   .map( (shape, index) => [shape, index] )
                                   .toIndexedSeq()
-                                  .filter( ([shape, _index]) => shape.isDead() )
-                                  .map( ([shape, index]) => index )
+                                  .filter( ([shape, _]) => shape.isDead() ) //eslint-disable-line no-unused-vars
+                                  .map( ([_, index]) => index )             //eslint-disable-line no-unused-vars
                                   .cacheResult();
   if (candidateIndices.size > 0) {
     const randomIndexIntoCandidateIndices = Math.floor(Math.random() * candidateIndices.size);
