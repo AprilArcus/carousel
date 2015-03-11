@@ -60,8 +60,7 @@ export default React.createClass({
             transforms: 'standards'};
   },
 
-  testFeatures() {
-    const testNode = document.createElement('div');
+  detectFeatures(testNode) {
     testNode.style.display = 'flex';
     if (testNode.style.display !== 'flex') {
       testNode.style.display = '-webkit-flex';
@@ -81,7 +80,8 @@ export default React.createClass({
 
   componentDidMount() {
     CarouselStore.addChangeListener(this.onChange);
-    this.testFeatures();
+    const testNode = document.createElement('div');
+    this.detectFeatures(testNode);
     this.handleReset();
     // React's onKeyDown event only listens when the component or
     // a child has focus. This is certainly the right thing to do
@@ -225,8 +225,8 @@ export default React.createClass({
       // right: 0,             // aesthetically preferrable to use
       // bottom: 0,            // absolute positioning -- this
       // left: 0               // effectively insets the endcaps.
-    },                         // However, this appears to trigger a
-    slider: {                  // rendering bug in Gecko.
+    },                         // However, this triggers a rendering
+    slider: {                  // bug in Gecko.
       flexGrow: 1,
       position: 'relative', // we will calculate how much to offset the
       whiteSpace: 'nowrap'  // slider in sliderStyle()
@@ -292,6 +292,12 @@ export default React.createClass({
   },
 
   webkitFlexFixUp() {
+    // FIXME: mutating the styles object in this way breaks
+    // react-hot-loader in Safari -- it will re-initialize the styles
+    // object to its lexically defined state without triggering the
+    // componentDidMount() -> detectFeatures() -> webkitFlexFixUp()
+    // call stack. The workaround would be to make all the effected
+    // styles into function calls.
     this.styles.container.display = '-webkit-flex';
     this.styles.container.WebkitAlignItems =
       this.styles.container.alignItems;
@@ -325,11 +331,9 @@ export default React.createClass({
     } else {
       messageStyle = {transform: 'scale(0,0)', transition: 'none'};
     }
-
     if (this.state.transforms === 'webkit') {
       messageStyle.WebkitTransform = messageStyle.transform;
     }
-
     return Object.assign({}, this.styles.message, messageStyle);
   },
 
