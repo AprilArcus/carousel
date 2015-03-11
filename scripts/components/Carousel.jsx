@@ -2,11 +2,11 @@
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 import keyMirror from 'react/lib/keyMirror';
+import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import Immutable from 'immutable';
 import Shape from './Shape';
 import CarouselStore from '../stores/CarouselStore';
 import CarouselActions from '../actions/CarouselActions';
-import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 
 export default React.createClass({
   mixins: [PureRenderMixin],
