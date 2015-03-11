@@ -12,16 +12,16 @@ export default React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
+    respawnThreshold: React.PropTypes.number,
+    slideDuration: React.PropTypes.number,
     numItems: React.PropTypes.number,
     numSlots: function(props, propName, componentName) {
-
       function rangeCheck(props, propName, componentName) { //eslint-disable-line no-shadow, no-unused-vars
         if (props[propName] > props.numItems) {
           return new Error('Carousel must be initialized with ' +
                            'enough items to fill every slot.');
         }
       }
-
       let error;
       [React.PropTypes.number, rangeCheck].every( validator => {
         // side effects are sometimes useful
@@ -29,10 +29,7 @@ export default React.createClass({
         return !error;
       });
       return error;
-
-    },
-    respawnThreshold: React.PropTypes.number,
-    slideDuration: React.PropTypes.number
+    }
   },
 
   getDefaultProps() {
@@ -52,37 +49,19 @@ export default React.createClass({
   },
 
   getInitialState() {
-    return {sliding: this.enums.sliding.STOPPED,
-            offsetIndex: 0,
-            genericInteractions: 0,
-            gameOver: false,
-            flex: 'flex',
-            flexShrink: 'flexShrink',
-            flexGrow: 'flexGrow',
-            alignItems: 'alignItems',
-            justifyContent: 'justifyContent',
-            transform: 'transform'};
-  },
-
-  detectFeatures(testNode) {
-    testNode.style.display = 'flex';
-    if (testNode.style.display !== 'flex') {
-      testNode.style.display = '-webkit-flex';
-      if (testNode.style.display === '-webkit-flex') {
-        this.setState({flex: '-webkit-flex',
-                       flexShrink: 'WebkitFlexShrink',
-                       flexGrow: 'WebkitFlexGrow',
-                       alignItems: 'WebkitAlignItems',
-                       justifyContent: 'WebkitJustifyContent'});
-      }
-    }
-    testNode.style.transform = 'Garbage Data';
-    if (testNode.style.transform === 'Garbage Data') {
-      testNode.style.WebkitTransform = 'Garbage Data';
-      if (testNode.style.WebkitTransform !== 'Garbage Data') {
-        this.setState({transform: 'WebkitTransform'});
-      }
-    }
+    return {
+      sliding: this.enums.sliding.STOPPED,
+      offsetIndex: 0,
+      genericInteractions: 0,
+      gameOver: false,
+      prefixes: Immutable.Map({
+        flex: 'flex',
+        flexShrink: 'flexShrink',
+        flexGrow: 'flexGrow',
+        alignItems: 'alignItems',
+        justifyContent: 'justifyContent',
+        transform: 'transform' })
+    };
   },
 
   componentDidMount() {
@@ -94,7 +73,7 @@ export default React.createClass({
     // a child has focus. This is certainly the right thing to do
     // in general (what if we have multiple of these carousel
     // components on a single page?) but in the spirit of Patreon's
-    // specification, which seems to gesturetoward a sort of shooting
+    // specification, which seems to gesture toward a sort of shooting
     // gallery type interface, we implement keyboard input in a game-
     // like way. To this end, we add global event listeners in the
     // lifecycle callbacks...
@@ -115,27 +94,26 @@ export default React.createClass({
     // ...and attempt to mitigate the most questionable aspect of this
     // approach with a guard clause against the possibility of another
     // focused element.
-
-    // FIXME: the DOM level 2 KeyboardEvent API is a mess.
-    // KeyboardEvent.keyCode has universal support, and
-    // KeyboardEvent.which has support in IE9+, but MDN considers both
-    // to be deprecated since they are ambiguous on non-QWERTY layouts.
-    // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
-    // However, as of March 2015, the proposed DOM level 3 replacements
-    // KeyboardEvent.key and KeyboardEvent.code remain unimplemented:
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=680830
     if (document.activeElement.tagName === 'BODY' &&
         this.state.sliding === this.enums.sliding.STOPPED) {
-      if ((event.keyCode === 0x25 ||  // left arrow
-           event.keyCode === 0x48 ||  // h
-           event.keyCode === 0x41) && // a
+      // FIXME: the DOM level 2 KeyboardEvent API is a mess.
+      // KeyboardEvent.keyCode has universal support, and
+      // KeyboardEvent.which has support in IE9+, but MDN considers both
+      // deprecated since they are ambiguous on non-QWERTY layouts:
+      // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+      // However, as of March 2015, the DOM level 3 replacements
+      // KeyboardEvent.key and KeyboardEvent.code remain unimplemented:
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=680830
+      if ((event.which === 0x25 ||  // left arrow
+           event.which === 0x48 ||  // h
+           event.which === 0x41) && // a
          !(event.altKey || event.metaKey)) {
         this.slideBackward();
         event.stopPropagation();
         this.handleGenericInteraction(event);
-      } else if ((event.keyCode === 0x27 ||  // right arrow
-                  event.keyCode === 0x4C ||  // l
-                  event.keyCode === 0x44) && // d
+      } else if ((event.which === 0x27 ||  // right arrow
+                  event.which === 0x4C ||  // l
+                  event.which === 0x44) && // d
                 !(event.altKey || event.metaKey)) {
         this.slideForward();
         event.stopPropagation();
@@ -212,12 +190,35 @@ export default React.createClass({
   // http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html
   // https://vimeo.com/channels/684289/116209150
 
+  detectFeatures(testNode) {
+    let prefixes = {};
+    testNode.style.display = 'flex';
+    if (testNode.style.display !== 'flex') {
+      testNode.style.display = '-webkit-flex';
+      if (testNode.style.display === '-webkit-flex') {
+        prefixes.flex = '-webkit-flex';
+        prefixes.flexShrink = 'WebkitFlexShrink';
+        prefixes.flexGrow = 'WebkitFlexGrow';
+        prefixes.alignItems = 'WebkitAlignItems';
+        prefixes.justifyContent = 'WebkitJustifyContent';
+      }
+    }
+    testNode.style.transform = 'Garbage Data';
+    if (testNode.style.transform === 'Garbage Data') {
+      testNode.style.WebkitTransform = 'Garbage Data';
+      if (testNode.style.WebkitTransform !== 'Garbage Data') {
+        prefixes.transform = 'WebkitTransform';
+      }
+    }
+    this.setState({prefixes: this.state.prefixes.merge(prefixes)});
+  },
+
   containerStyle() {
-    const container = {
-      position: 'relative',     // we'll position the reset and clear
-      display: this.state.flex, // buttons relative to the outer div.
-      [this.state.alignItems]: 'center',
-      [this.state.justifyContent]: 'space-between',
+    const container = {     // we'll position the reset and clear
+      position: 'relative', // buttons relative to the outer div.
+      display: this.state.prefixes.get('flex'),
+      [this.state.prefixes.get('alignItems')]: 'center',
+      [this.state.prefixes.get('justifyContent')]: 'space-between',
       overflow: 'hidden',
       height: '100%' // occupy the full height of our parent rather than
     };               // the natural height of the tallest carousel item.
@@ -226,23 +227,23 @@ export default React.createClass({
 
   endCapStyle() {                 // setting negative zIndex on the
     return {                      // carousel items would break their
-      [this.state.flexShrink]: 0, // onClick handlers, so we use
+      [this.state.prefixes.get('flexShrink')]: 0, // onClick handlers, so we use
       zIndex: 100                 // positive z-indices [0,20) there to
     };                            // randomize their layer and
   },                              // compensate for it here.
 
   stockStyle() {
-    return {
-      [this.state.flexGrow]: 1,          // the stock is the reference
-      display: this.state.flex,          // for the slider and the 'game
-      [this.state.alignItems]: 'center', // over' message. when running
-      position: 'relative'               // at full bleed, it is
-      // position: 'absolute',           // aesthetically preferrable to
-      // top: 0,                         // absolute positioning -- this
-      // right: 0,                       // effectively insets the
-      // bottom: 0,                      // endcaps. However, doing so
-      // left: 0                         // triggers a rendering bug in
-    };                                   // Gecko. TODO: test case.
+    return { // the stock is the reference for the slider and the 'game
+      [this.state.prefixes.get('flexGrow')]: 1, // over' message. when
+      display: this.state.prefixes.get('flex'), // running at full bleed
+      [this.state.prefixes.get('alignItems')]: 'center', // it is
+      position: 'relative'               // aesthetically preferrable to
+      // position: 'absolute',           // use absolute positioning --
+      // top: 0,                         // this effectively insets the
+      // right: 0,                       // endcaps. However, doing so
+      // bottom: 0,                      // triggers a rendering bug in
+      // left: 0                         // Gecko. TODO: make minimal
+    };                                   // test case, file bug.
   },
 
   sliderStyle() {
@@ -262,7 +263,7 @@ export default React.createClass({
         transition = 'none';
     }
     return {
-      [this.state.flexGrow]: 1,
+      [this.state.prefixes.get('flexGrow')]: 1,
       position: 'relative',
       left: left,
       transition: transition,
@@ -277,9 +278,9 @@ export default React.createClass({
       right: 0,
       bottom: 0,
       left: 0,
-      display: [this.state.flex],
-      [this.state.justifyContent]: 'center',
-      [this.state.alignItems]: 'center'
+      display: [this.state.prefixes.get('flex')],
+      [this.state.prefixes.get('justifyContent')]: 'center',
+      [this.state.prefixes.get('alignItems')]: 'center'
     };
   },
 
@@ -296,7 +297,7 @@ export default React.createClass({
       textAlign: 'center',
       fontSize: 50,
       fontWeight: 100,
-      [this.state.transform]: transform,
+      [this.state.prefixes.get('transform')]: transform,
       transition: transition
     };
   },
@@ -374,7 +375,7 @@ export default React.createClass({
              style={this.itemStyle()}
              hp={shape.hp}
              seed={shape.seed}
-             transform={this.state.transform} />);
+             transform={this.state.prefixes.get('transform')} />);
     return items.toArray(); // FIXME: React 0.13 will support custom
   },                        // iterables in JSX, but for now we must
                             // convert to the built-in Array type.
