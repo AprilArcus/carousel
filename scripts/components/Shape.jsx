@@ -5,6 +5,19 @@ const PureRenderMixin = addons.PureRenderMixin;
 import seedrandom from 'seedrandom';
 import CarouselActions from '../actions/CarouselActions';
 
+function clip(n, min, max) {
+  return n < min ? min : n > max ? max : n;
+}
+// an optimized reductions (clojure) / scanl (haskell) function
+function reductions(callback, initial, array) {
+  let result = new Array(array.length + 1);
+  result[0] = initial;
+  array.forEach( (element, index) =>
+    result[index + 1] = callback(result[index], element)
+  );
+  return result;
+}
+
 // An ES6 translation of Mike Ounsworth's random polygon algorithm
 // c.f. http://stackoverflow.com/a/25276331
 function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
@@ -12,6 +25,8 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   // nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
   // gauss is simplified for statelessness and possibly incorrect
+  // these need to be inside the scope of the random number generator we
+  // get passed in.
   function gauss(mu, sigma) {
     const x2pi = rng() * Math.PI * 2;
     const g2rad = Math.sqrt(-2 * Math.log(1.0 - rng()));
@@ -20,18 +35,6 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   }
   function uniform(a, b) {
     return a + (b - a) * rng();
-  }
-  function clip(n, min, max) {
-    return n < min ? min : n > max ? max : n;
-  }
-  // an optimized reductions (clojure) / scanl (haskell) function
-  function reductions(callback, initial, array) {
-    let result = new Array(array.length + 1);
-    result[0] = initial;
-    array.forEach( (element, index) =>
-      result[index + 1] = callback(result[index], element)
-    );
-    return result;
   }
 
   // Start with the centre of the polygon at ctrX, ctrY, then creates
