@@ -1,6 +1,8 @@
 Carousel Demo for Patreon
 =========================
 
+![](screenshot.png)
+
 A circular carousel with a "shooting gallery" type interaction. Points
 of interest:
 
@@ -15,8 +17,8 @@ of interest:
   the utility of this methodology, see `components/Button.jsx`,
   which faithfully implements a fully-featured bootstrap style button
   with no external CSS dependencies. see Christopher Chedeau's terrific
-  talk, ["React: CSS in JS"](https://vimeo.com/channels/684289/116209150)
-  and [slide deck](http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html) for further exposition and rationalle. I believe this will be the most
+  [talk](https://vimeo.com/channels/684289/116209150) and
+  [slide deck](http://blog.vjeux.com/2014/javascript/react-css-in-js-nationjs.html) for further exposition and rationalle. I believe this will be the most
   important paradigm shift in front-end web development since Node.js.
 
 * The model and events layers are implemented with a simple [Flux](https://facebook.github.io/flux/)
