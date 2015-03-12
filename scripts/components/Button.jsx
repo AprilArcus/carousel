@@ -1,8 +1,8 @@
 /* eslint-env es6 */
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
-import { lighten, darken } from '../lib/colorHelpers'
-import variables from '../lib/bootstrapVariables'
+import { lighten, darken } from '../utils/colorHelpers'
+import variables from '../utils/bootstrapVariables'
 
 export default React.createClass({
   mixins: [PureRenderMixin],

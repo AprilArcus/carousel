@@ -1,7 +1,7 @@
 {
   "name": "carousel",
   "version": "0.0.1",
-  "description": "Carousel Demo",
+  "description": "Carousel Demo for Patreon",
   "scripts": {
     "start": "node server.js"
   },
@@ -10,13 +10,13 @@
   "devDependencies": {
     "babel": "^4.7.8",
     "babel-loader": "^4.1.0",
-    "react-hot-loader": "^1.2.1",
-    "webpack": "^1.7.2",
+    "react-hot-loader": "^1.2.3",
+    "webpack": "^1.7.3",
     "webpack-dev-server": "^1.7.0"
   },
   "dependencies": {
     "babel-runtime": "^4.7.8",
-    "react": "^0.12.2",
+    "react": "^0.13.0",
     "flux": "^2.0.1",
     "immutable": "^3.6.4",
     "seedrandom": "^2.3.11"

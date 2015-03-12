@@ -137,16 +137,12 @@ export default React.createClass({
   // screening for us. TODO: file issue & submit pull request
 
   componentDidMount() {
-    // TODO: getDOMNode() is deprecated in React 0.13
-    // const componentNode = React.findDOMNode(this.refs.component); // 0.13
-    const componentNode = this.getDOMNode();                         // 0.12
+    const componentNode = React.findDOMNode(this.refs.component);
     ReactTransitionEvents.addEndEventListener(componentNode, this.stopTransitionEventPropogation);
   },
 
   componentWillUnmount() {
-    // TODO: getDOMNode() is deprecated in React 0.13
-    // const componentNode = React.findDOMNode(this.refs.component); // 0.13
-    const componentNode = this.getDOMNode();                         // 0.12
+    const componentNode = React.findDOMNode(this.refs.component);
     ReactTransitionEvents.removeEndEventListener(componentNode, this.stopTransitionEventPropogation);
   },
 

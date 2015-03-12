@@ -70,9 +70,7 @@ export default React.createClass({
     CarouselStore.addChangeListener(this.onChange);
     CarouselActions.reset(this.props.numItems); // initialize backing store
 
-    // TODO: getDOMNode() is deprecated in React 0.13
-    // const sliderNode = React.findDOMNode(this.refs.slider);    // 0.13
-    const sliderNode = this.getDOMNode().children[1].children[0]; // 0.12
+    const sliderNode = React.findDOMNode(this.refs.slider);
     ReactTransitionEvents.addEndEventListener(sliderNode, this.stopSlide);
 
     // React's onKeyDown event only listens when the component or
@@ -89,9 +87,7 @@ export default React.createClass({
   componentWillUnmount() {
     CarouselStore.removeChangeListener(this.onChange);
 
-    // TODO: getDOMNode() is deprecated in React 0.13
-    // const sliderNode = React.findDOMNode(this.refs.slider);    // 0.13
-    const sliderNode = this.getDOMNode().children[1].children[0]; // 0.12
+    const sliderNode = React.findDOMNode(this.refs.slider);
     ReactTransitionEvents.removeEndEventListener(sliderNode, this.stopSlide);
 
     window.removeEventListener('keydown', this.handleKeyDown);
@@ -318,6 +314,9 @@ export default React.createClass({
   },
 
   renderItems() {
+    // suppress render until the backing store is initialized
+    if (this.state.items === undefined) return [];
+
     // Fetch the items we need...
     const withIndices = this.state.items.toKeyedSeq()
                                         .map( (shape, storeIndex) =>
@@ -329,7 +328,7 @@ export default React.createClass({
                                      this.state.offsetIndex
                                        + this.props.numSlots + 4);
     // ...and render them:
-    const items = slice.map( ([shape, storeIndex], sliceIndex) =>
+    return slice.toArray().map( ([shape, storeIndex], sliceIndex) =>
       // a unique and stable key avoids unecessary DOM operations. If we
       // didn't have padding, the storeIndex would be fine by itself,
       // but since some shapes will be rendered twice, we take extra
@@ -346,17 +345,9 @@ export default React.createClass({
              hp={shape.hp}
              seed={shape.seed}
              prefixes={this.props.prefixes} />);
-    // TODO: conversion to built-in Array is unnecessary in React 0.13
-    return items.toArray(); // 0.12
-    // return items         // 0.13
   },
 
   render() {
-    // suppress render until the backing store is initialized
-    if (this.state.items === undefined) {
-      return <div style={this.containerStyle()} />;
-    }
-
     return <div style={this.containerStyle()}
                 onClick={this.handleGenericInteraction}>
              <div style={this.endCapStyle()}>

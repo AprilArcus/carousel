@@ -2,7 +2,6 @@
 import { lighten, darken } from './colorHelpers'
 
 // like twitter bootstrap
-
 // https://github.com/twbs/bootstrap/blob/f5beebe726aa8c1810015d8c62931f4559b49664/less/variables.less
 const variables = {};
 

@@ -1,7 +1,7 @@
 /* eslint-env es6, browser */
 import React from 'react';
 import Carousel from './components/Carousel';
-import detectPrefixes from './lib/detectPrefixes';
+import detectPrefixes from './utils/detectPrefixes';
 
 const testNode = document.createElement('div');
 const prefixes = detectPrefixes(testNode);
