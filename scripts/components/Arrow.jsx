@@ -39,7 +39,6 @@ export default React.createClass({
   },
 
   render() {
-    console.log(this.props.disabled);
     return <svg viewBox="0 0 100 100"
                 style={this.props.style}
                 onClick={this.handleClick} >
