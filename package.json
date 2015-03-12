@@ -2,6 +2,10 @@
   "name": "carousel",
   "version": "0.0.1",
   "description": "Carousel Demo for Patreon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AprilArcus/carousel.git"
+  },
   "scripts": {
     "start": "node server.js",
     "browserify": "NODE_ENV=production PATH=$(npm bin):$PATH browserify scripts/index.jsx --extension=.jsx --transform [ babelify --optional runtime ] --global-transform [ uglifyify ] --outfile scripts/bundle.js",
