@@ -5,6 +5,8 @@ import keyMirror from 'react/lib/keyMirror';
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import Immutable from 'immutable';
 import Shape from './Shape';
+import Button from './Button';
+import Heart from './Heart';
 import CarouselStore from '../stores/CarouselStore';
 import CarouselActions from '../actions/CarouselActions';
 
@@ -23,8 +25,7 @@ export default React.createClass({
       }
       let error;
       [React.PropTypes.number, rangeCheck].every( validator => {
-        // side effects are sometimes useful
-        error = validator(props, propName, componentName);
+        error = validator(props, propName, componentName); // side effect
         return !error;
       });
       return error;
@@ -67,7 +68,7 @@ export default React.createClass({
 
   componentDidMount() {
     CarouselStore.addChangeListener(this.onChange);
-    CarouselActions.reset(this.props.numItems);
+    CarouselActions.reset(this.props.numItems); // initialize backing store
 
     // TODO: getDOMNode() is deprecated in React 0.13
     // const sliderNode = React.findDOMNode(this.refs.slider);    // 0.13
@@ -202,19 +203,19 @@ export default React.createClass({
     };                            // to randomize their layering and
   },                              // compensate for it here.
 
-  stockStyle() {
-    return { // the stock is the reference for the slider and the 'game
-      [this.props.prefixes.flexGrow]: 1, // over' message. when
-      display: this.props.prefixes.flex, // running at full bleed
-      [this.props.prefixes.alignItems]: 'center', // it is aesthetically
-      position: 'relative'               // preferrable to use absolute
-      // position: 'absolute',           // positioning -- this effec-
-      // top: 0,                         // tively insets the endcaps.
-      // right: 0,                       // However, doing so triggers a
+  stockStyle() {                         // the stock is the reference
+    return {                             // for the slider and the 'game
+      [this.props.prefixes.flexGrow]: 1, // over' message. when running
+      display: this.props.prefixes.flex, // at full bleed it is aesthet-
+      [this.props.prefixes.alignItems]: 'center', // ically preferrable
+      position: 'relative'               // to use absolute positioning;
+      // position: 'absolute',           // effectively insetting the
+      // top: 0,                         // endcaps. However, doing so
+      // right: 0,                       // triggers an inscrutable
       // bottom: 0,                      // rendering bug in Gecko.
-      // left: 0                         // TODO: make minimal
-    };                                   // test case, file bug.
-  },
+      // left: 0                         //
+    };                                   // TODO: file bug report with
+  },                                     //       minimal test case
 
   sliderStyle() {
     const slideDuration = '150ms';
@@ -306,21 +307,12 @@ export default React.createClass({
     },
     buttonGroup: {
       position: 'absolute',
-      bottom: 4,
+      bottom: 0,
       right: 4,
-      zIndex: 100
+      zIndex: 100 // c.f. comment in endCapStyle()
     },
-    button: { // fake twitter bootstrap button
-      display: 'inlineBlock',
-      webkitAppearance: 'button',
-      marginLeft: 4,
-      height: 34,
-      fontSize: 14,
-      backgroundColor: '#fff',
-      border: '1px solid #ccc',
-      borderRadius: 4,
-      padding: '6px 12px',
-      lineHeight: 1.428571429
+    button: {
+      margin: '8px 4px'
     }
   },
 
@@ -344,8 +336,8 @@ export default React.createClass({
       // which wouldn't be necessary provided we aren't concerned about
       // loss-of-precision errors (it would take 40 million years to
       // lose integer precision on a double precision float at 150ms per
-      // slide) but immutable.js crashes node when I try to slice neg-
-      // ative indices out of an infinite list, so we'll live with it.
+      // slide) but immutable.js crashes when I try to slice negative
+      // indices out of an infinite list, so we'll live with it for now.
       <Shape key={storeIndex + this.state.items.size *
                   Math.floor(sliceIndex / this.state.items.size)}
              index={storeIndex}
@@ -353,9 +345,11 @@ export default React.createClass({
              hp={shape.hp}
              seed={shape.seed}
              prefixes={this.props.prefixes} />);
-    return items.toArray(); // FIXME: React 0.13 will support custom
-  },                        // iterables in JSX, but for now we must
-                            // convert to the built-in Array type.
+    // TODO: conversion to built-in Array is unnecessary in React 0.13
+    return items.toArray(); // 0.12
+    // return items         // 0.13
+  },
+
   render() {
     // suppress render until the backing store is initialized
     if (this.state.items === undefined) {
@@ -376,11 +370,14 @@ export default React.createClass({
                  {this.renderItems()}
                </div>
                <div style={this.messageContainerStyle()}>
-                 <span style={this.messageStyle()}>
-                   {'Thanks for Playing!'}
-                   <br />
-                   {'April Arcus <3 Patreon'}
-                 </span>
+                 <div style={this.messageStyle()}>
+                   <div>{'Thanks for Playing!'}</div>
+                   <div>{'April Arcus'}
+                        <Heart style={{verticalAlign: '-7%'}}
+                               prefixes={this.props.prefixes} />
+                        Patreon
+                   </div>
+                 </div>
                </div>
              </div>
              <div style={this.endCapStyle()}>
@@ -391,15 +388,17 @@ export default React.createClass({
                       onClick={this.slideForward} />
              </div>
              <div style={this.staticStyles.buttonGroup}>
-               <input type="button"
-                      style={this.staticStyles.button}
-                      value="Reset"
-                      onClick={this.handleReset} />
-               <input type="button"
-                      style={this.staticStyles.button}
-                      value="Clear"
-                      disabled={this.state.gameOver}
-                      onClick={this.handleClear} />
+               <Button style={this.staticStyles.button}
+                       bsSize="large"
+                       bsStyle="danger"
+                       value="Reset"
+                       onClick={this.handleReset} />
+               <Button value="Clear"
+                       bsSize="large"
+                       bsStyle="success"
+                       style={this.staticStyles.button}
+                       disabled={this.state.gameOver}
+                       onClick={this.handleClear} />
              </div>
            </div>;
   }

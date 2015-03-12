@@ -1,6 +1,7 @@
 /* eslint-env es6, node */
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
+import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import seedrandom from 'seedrandom';
 import CarouselActions from '../actions/CarouselActions';
 
@@ -129,6 +130,30 @@ export default React.createClass({
     }
   },
 
+  // our parent is listening for transition end events on its slider
+  // element, but it will hear transition end events from all of its
+  // children unless we silence them. This is certainly a bug in
+  // ReactTransitionEvents -- it should be able to do this kind of
+  // screening for us. TODO: file issue & submit pull request
+
+  componentDidMount() {
+    // TODO: getDOMNode() is deprecated in React 0.13
+    // const componentNode = React.findDOMNode(this.refs.component); // 0.13
+    const componentNode = this.getDOMNode();                         // 0.12
+    ReactTransitionEvents.addEndEventListener(componentNode, this.stopTransitionEventPropogation);
+  },
+
+  componentWillUnmount() {
+    // TODO: getDOMNode() is deprecated in React 0.13
+    // const componentNode = React.findDOMNode(this.refs.component); // 0.13
+    const componentNode = this.getDOMNode();                         // 0.12
+    ReactTransitionEvents.removeEndEventListener(componentNode, this.stopTransitionEventPropogation);
+  },
+
+  stopTransitionEventPropogation(event) {
+    event.stopPropagation();
+  },
+
   handleClick() {
     if (this.props.hp > 0) CarouselActions.hit(this.props.index);
   },
@@ -175,7 +200,8 @@ export default React.createClass({
   },
 
   render() {
-    return <div style={this.containerStyle()}>
+    return <div ref="component"
+                style={this.containerStyle()}>
              <svg width="100%"
                   viewBox="-50 -50 100 100"
                   style={Object.assign({overflow: 'visible'},
