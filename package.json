@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "browserify": "NODE_ENV=production PATH=$(npm bin):$PATH browserify scripts/index.jsx --extension=.jsx --transform [ babelify --optional runtime ] --global-transform [ uglifyify ] --outfile scripts/bundle.js",
-    "webpack": "webpack --progress --colors --config webpack-production.config.js"
+    "webpack": "PATH=$(npm bin):$PATH webpack --progress --colors --config webpack-production.config.js"
   },
   "author": "April Arcus <april.arcus@gmail.com> (http://github.com/aprilarcus)",
   "license": "MIT",

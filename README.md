@@ -57,7 +57,7 @@ of interest:
   `display: table-cell;`). IE10+ support is probably realistic, and the
   path toward supporting prefixed CSS in a general way while maintaing
   the purity of `render()` is clear: we detect prefixes before
-  initializing React and then pass an key‐value store from standard
+  initializing React and then pass a key‐value store from standard
   property names to prefixed names through the tree of React components
   as props. See `utils/detectPrefixes.js` and `index.jsx` for details.
   As for mobile, React Touch events looks straightforward, and
