@@ -9,4 +9,5 @@ const prefixes = detectPrefixes(testNode);
 React.render(<Carousel numSlots={6}
                        numItems={7}
                        respawnThreshold={12}
-                       prefixes={prefixes} />, document.getElementById('carousel'));
+                       prefixes={prefixes} />,
+             document.getElementById('carousel'));

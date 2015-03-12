@@ -2,8 +2,16 @@
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
-import seedrandom from 'seedrandom';
 import CarouselActions from '../actions/CarouselActions';
+// a quick and dirty non-cryptographically secure seeded rng with a
+// api after David Bau's https://www.npmjs.com/package/seedrandom
+// h/t Antti Sykäri http://stackoverflow.com/a/19303725
+function seedrandom(seed) {
+  return function rng() {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  };
+}
 
 function clip(n, min, max) {
   return n < min ? min : n > max ? max : n;
@@ -25,10 +33,10 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
                        spikeyness, numVerts, rng) {
   // Nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
-  // gauss is simplified for statelessness and possibly incorrect.
   // These need to be inside the scope of the random number generator
-  // pass in as a paramter.
+  // pass in as a parameter.
   function gauss(mu, sigma) {
+    // simplified for statelessness and possibly incorrect.
     const x2pi = rng() * Math.PI * 2;
     const g2rad = Math.sqrt(-2 * Math.log(1.0 - rng()));
     const z = Math.cos(x2pi) * g2rad;
@@ -130,26 +138,6 @@ export default React.createClass({
     }
   },
 
-  // our parent is listening for transition end events on its slider
-  // element, but it will hear transition end events from all of its
-  // children unless we silence them. This is certainly a bug in
-  // ReactTransitionEvents -- it should be able to do this kind of
-  // screening for us. TODO: file issue & submit pull request
-
-  componentDidMount() {
-    const componentNode = React.findDOMNode(this.refs.component);
-    ReactTransitionEvents.addEndEventListener(componentNode, this.stopTransitionEventPropogation);
-  },
-
-  componentWillUnmount() {
-    const componentNode = React.findDOMNode(this.refs.component);
-    ReactTransitionEvents.removeEndEventListener(componentNode, this.stopTransitionEventPropogation);
-  },
-
-  stopTransitionEventPropogation(event) {
-    event.stopPropagation();
-  },
-
   handleClick() {
     if (this.props.hp > 0) CarouselActions.hit(this.props.index);
   },
@@ -208,5 +196,25 @@ export default React.createClass({
                         onClickCapture={this.handleClick} />
              </svg>
            </div>;
+  },
+
+  // our parent is listening for transition end events on its slider
+  // element, but it will hear transition end events from all of its
+  // children unless we silence them. This is certainly a bug in
+  // ReactTransitionEvents -- it should be able to do this kind of
+  // screening for us. TODO: file issue & submit pull request
+
+  componentDidMount() {
+    const componentNode = React.findDOMNode(this.refs.component);
+    ReactTransitionEvents.addEndEventListener(componentNode, this.stopTransitionEventPropogation);
+  },
+
+  componentWillUnmount() {
+    const componentNode = React.findDOMNode(this.refs.component);
+    ReactTransitionEvents.removeEndEventListener(componentNode, this.stopTransitionEventPropogation);
+  },
+
+  stopTransitionEventPropogation(event) {
+    event.stopPropagation();
   }
 });
