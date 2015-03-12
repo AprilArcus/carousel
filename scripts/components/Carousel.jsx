@@ -253,18 +253,21 @@ export default React.createClass({
   },
 
   messageStyle() {
-    let transform, transition;
+    let transform, transition, lineHeight;
     if (this.state.gameOver) {
       transform = 'scale(1,1)';
       transition = 'all 450ms cubic-bezier(0.4,1.4,0.4,1.0)';
+      lineHeight = 2.2;
     } else {
       transform = 'scale(0,0)';
       transition = 'none';
+      lineHeight = 0.1;
     }
     return {
       textAlign: 'center',
       fontSize: 50,
       fontWeight: 100,
+      lineHeight: lineHeight,
       [this.props.prefixes.transform]: transform,
       transition: transition
     };
@@ -363,14 +366,16 @@ export default React.createClass({
                </div>
                <div style={this.messageContainerStyle()}>
                  <div style={this.messageStyle()}>
-                   <div>{'Thanks for Playing!'}</div>
-                   <div>
+                   <span>{'Thanks for playing!'}</span>
+                   <br />
+                   <span>
                      {'April Arcus'}
-                     <Heart style={{verticalAlign: '-7%'}}
+                     <Heart style={{verticalAlign: '-30%',
+                                    margin: '0 0.2em'}}
                             prefixes={this.props.prefixes}
                             onClick={this.handleReset} />
                      {'Patreon'}
-                   </div>
+                   </span>
                  </div>
                </div>
              </div>

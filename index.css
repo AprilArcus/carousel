@@ -4,7 +4,6 @@ html, body {
 body {
   margin: 0;
   background: linear-gradient(160deg, #009ee3 0%,#5e4e9c 100%);
-  font-family: 'zapfino';
 }
 #carousel {
   /*height: 70%;

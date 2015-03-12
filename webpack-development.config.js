@@ -1,4 +1,7 @@
-var webpack = require('webpack');
+/* eslint-env node */
+/* eslint-disable quotes */
+var webpack = require('webpack'),
+    path = require('path');
 
 module.exports = {
   devtool: 'eval',
@@ -8,7 +11,7 @@ module.exports = {
     './scripts/index'
   ],
   output: {
-    path: __dirname + '/scripts/',
+    path: path.resolve('scripts'),
     filename: 'bundle.js',
     publicPath: '/scripts/'
   },

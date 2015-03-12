@@ -4,7 +4,8 @@
   "description": "Carousel Demo for Patreon",
   "scripts": {
     "start": "node server.js",
-    "build": "NODE_ENV=production PATH=$(npm bin):$PATH browserify scripts/index.jsx --extension=.jsx --transform [ babelify --optional runtime ] --global-transform [ uglifyify ] --outfile scripts/bundle.js"
+    "browserify": "NODE_ENV=production PATH=$(npm bin):$PATH browserify scripts/index.jsx --extension=.jsx --transform [ babelify --optional runtime ] --global-transform [ uglifyify ] --outfile scripts/bundle.js",
+    "webpack": "webpack --progress --colors --config webpack-production.config.js"
   },
   "author": "April Arcus <april.arcus@gmail.com> (http://github.com/aprilarcus)",
   "license": "MIT",
