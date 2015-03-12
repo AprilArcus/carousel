@@ -6,6 +6,7 @@ import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import Immutable from 'immutable';
 import Shape from './Shape';
 import Button from './Button';
+import Arrow from './Arrow';
 import Heart from './Heart';
 import CarouselStore from '../stores/CarouselStore';
 import CarouselActions from '../actions/CarouselActions';
@@ -282,27 +283,10 @@ export default React.createClass({
   },
 
   staticStyles: {
-    leftArrow: {
+    arrow: {
+      width: 70,
       margin: 10,
-      width: 0,
-      height: 0,
-      backgroundColor: 'transparent',
-      padding: 0,
-      borderTop: '15px solid transparent',
-      borderRight: '15px solid black',
-      borderBottom: '15px solid transparent',
-      borderLeft: 0
-    },
-    rightArrow: {
-      margin: 10,
-      width: 0,
-      height: 0,
-      backgroundColor: 'transparent',
-      padding: 0,
-      borderTop: '15px solid transparent',
-      borderRight: 0,
-      borderBottom: '15px solid transparent',
-      borderLeft: '15px solid black'
+      zIndex: 1000
     },
     buttonGroup: {
       position: 'absolute',
@@ -351,14 +335,16 @@ export default React.createClass({
   },
 
   render() {
+    const arrowsDisabled = (this.state.sliding !==
+                            this.enums.sliding.STOPPED) ||
+                           this.state.gameOver;
     return <div style={this.containerStyle()}
                 onClick={this.handleGenericInteraction}>
              <div style={this.endCapStyle()}>
-               <input type="button"
-                      style={this.staticStyles.leftArrow}
-                      disabled={this.state.sliding !==
-                                this.enums.sliding.STOPPED}
-                      onClick={this.slideBackward} />
+               <Arrow direction={'left'}
+                      style={this.staticStyles.arrow}
+                      disabled={arrowsDisabled}
+                      clickHandler={this.slideBackward} />
              </div>
              <div style={this.stockStyle()}>
                <div ref="slider" style={this.sliderStyle()}>
@@ -380,21 +366,20 @@ export default React.createClass({
                </div>
              </div>
              <div style={this.endCapStyle()}>
-               <input type="button"
-                      style={this.staticStyles.rightArrow}
-                      disabled={this.state.sliding !==
-                                this.enums.sliding.STOPPED}
-                      onClick={this.slideForward} />
+               <Arrow direction={'right'}
+                      style={this.staticStyles.arrow}
+                      disabled={arrowsDisabled}
+                      clickHandler={this.slideForward} />
              </div>
              <div style={this.staticStyles.buttonGroup}>
                <Button style={this.staticStyles.button}
                        bsSize="large"
-                       bsStyle="danger"
+                       bsStyle="default"
                        value="Reset"
                        onClick={this.handleReset} />
                <Button value="Clear"
                        bsSize="large"
-                       bsStyle="success"
+                       bsStyle="default"
                        style={this.staticStyles.button}
                        disabled={this.state.gameOver}
                        onClick={this.handleClear} />

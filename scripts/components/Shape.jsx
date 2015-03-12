@@ -3,6 +3,7 @@ import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import CarouselActions from '../actions/CarouselActions';
+
 // a quick and dirty non-cryptographically secure seeded rng with a
 // api after David Bau's https://www.npmjs.com/package/seedrandom
 // h/t Antti Sykäri http://stackoverflow.com/a/19303725
@@ -34,7 +35,7 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   // Nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
   // These need to be inside the scope of the random number generator
-  // pass in as a parameter.
+  // passed in as a parameter.
   function gauss(mu, sigma) {
     // simplified for statelessness and possibly incorrect.
     const x2pi = rng() * Math.PI * 2;
