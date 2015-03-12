@@ -23,9 +23,10 @@ of interest:
   Immutable collection is altered, the Store emits a change event
   received by the master component's changeListener. This calls
   `Carousel.onChange()`, which retrieves the new state from store,
-  triggering a re-render and propogating the new state into it child
-  `Shape` components. Because these implement PureRenderMixin, React
-  is able to avoid unecessarily re-rendering them.
+  triggering a re-render and propogating the new state into its
+  `components/Shape.jsx` children. Because all components implement
+  PureRenderMixin, React is able to avoid unecessarily re-rendering
+  anything.
 
 * Immutable.js has an API for functional manipulation of data
   structures, superior in many respects to underscore/lodash. In
