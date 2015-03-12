@@ -7,7 +7,7 @@ const testNode = document.createElement('div');
 const prefixes = detectPrefixes(testNode);
 
 React.render(<Carousel numSlots={6}
-                       numItems={7}
+                       numItems={8}
                        respawnThreshold={12}
                        prefixes={prefixes} />,
              document.getElementById('carousel'));
