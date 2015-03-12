@@ -1,4 +1,4 @@
-/* eslint-env es6, node */
+/* eslint-env es6 */
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
@@ -23,11 +23,11 @@ function reductions(callback, initial, array) {
 // c.f. http://stackoverflow.com/a/25276331
 function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
                        spikeyness, numVerts, rng) {
-  // nonce implementations of a few functions from Python's random.py
+  // Nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
-  // gauss is simplified for statelessness and possibly incorrect
-  // these need to be inside the scope of the random number generator we
-  // get passed in.
+  // gauss is simplified for statelessness and possibly incorrect.
+  // These need to be inside the scope of the random number generator
+  // pass in as a paramter.
   function gauss(mu, sigma) {
     const x2pi = rng() * Math.PI * 2;
     const g2rad = Math.sqrt(-2 * Math.log(1.0 - rng()));

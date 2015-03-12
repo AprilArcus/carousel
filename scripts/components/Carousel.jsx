@@ -1,4 +1,4 @@
-/* eslint-env es6, node */
+/* eslint-env es6 */
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 import keyMirror from 'react/lib/keyMirror';
@@ -311,8 +311,9 @@ export default React.createClass({
       right: 4,
       zIndex: 100 // c.f. comment in endCapStyle()
     },
-    button: {
-      margin: '8px 4px'
+    button: {                            // Safari disables subpixel
+      margin: '8px 4px',                 // aliasing during animations,
+      WebkitFontSmoothing: 'antialiased' // to jarring effect.
     }
   },
 
@@ -372,10 +373,12 @@ export default React.createClass({
                <div style={this.messageContainerStyle()}>
                  <div style={this.messageStyle()}>
                    <div>{'Thanks for Playing!'}</div>
-                   <div>{'April Arcus'}
-                        <Heart style={{verticalAlign: '-7%'}}
-                               prefixes={this.props.prefixes} />
-                        Patreon
+                   <div>
+                     {'April Arcus'}
+                     <Heart style={{verticalAlign: '-7%'}}
+                            prefixes={this.props.prefixes}
+                            onClick={this.handleReset} />
+                     {'Patreon'}
                    </div>
                  </div>
                </div>

@@ -1,3 +1,4 @@
+/* eslint-env es6 */
 import { lighten, darken } from './colorHelpers'
 
 // like twitter bootstrap

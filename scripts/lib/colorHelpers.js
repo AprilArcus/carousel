@@ -1,6 +1,7 @@
+/* eslint-env es6 */
 // some helper functions, in the style of less
 
-function hslTriple2rgbString(h, s, l) {
+function hslTriple2hexString(h, s, l) {
   const h6 = h * 6;
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(h6 % 2 - 1));
@@ -25,7 +26,7 @@ function hslTriple2rgbString(h, s, l) {
   }).join('')}`;
 }
 
-function rgbString2rgbTriple(string) {
+function hexString2rgbTriple(string) {
   if (string.length === 4 || string.length === 7) {
     string = string.slice(1);
   }
@@ -59,16 +60,16 @@ function rgbTriple2hslTriple([r, g, b]) {
   return [h, s, l];
 }
 
-export function lighten(rgb, percent) {
-  const [h, s, l] = rgbTriple2hslTriple(rgbString2rgbTriple(rgb));
+export function lighten(rgbHexString, percent) {
+  const [h, s, l] = rgbTriple2hslTriple(hexString2rgbTriple(rgbHexString));
   let lightened = l + percent / 100;
   lightened = (lightened > 1.0) ? 1.0 : lightened;
-  return hslTriple2rgbString(h, s, lightened);
+  return hslTriple2hexString(h, s, lightened);
 }
 
-export function darken(rgb, percent) {
-  const [h, s, l] = rgbTriple2hslTriple(rgbString2rgbTriple(rgb));
+export function darken(rgbHexString, percent) {
+  const [h, s, l] = rgbTriple2hslTriple(hexString2rgbTriple(rgbHexString));
   let darkened = l - percent / 100;
   darkened = (darkened < 0) ? 0 : darkened;
-  return hslTriple2rgbString(h, s, darkened);
+  return hslTriple2hexString(h, s, darkened);
 }

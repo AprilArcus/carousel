@@ -1,4 +1,4 @@
-/* eslint-env es6, node */
+/* eslint-env es6 */
 import React from 'react';
 import { PureRenderMixin } from 'react/addons';
 import { lighten, darken } from '../lib/colorHelpers'

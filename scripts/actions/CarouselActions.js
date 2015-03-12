@@ -1,4 +1,4 @@
-/* eslint-env es6, node */
+/* eslint-env es6 */
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import CarouselConstants from '../constants/CarouselConstants';
 

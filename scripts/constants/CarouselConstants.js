@@ -1,4 +1,4 @@
-/* eslint-env es6, node */
+/* eslint-env es6 */
 import keyMirror from 'react/lib/keyMirror';
 
 export default keyMirror({
