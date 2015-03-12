@@ -1,7 +1,7 @@
 Carousel Demo for Patreon
 =========================
 
-![](screenshot.png)
+![http://aprilarcus.github.io/carousel/](screenshot.png)
 
 A circular carousel with a "shooting gallery" type interaction. Points
 of interest:
