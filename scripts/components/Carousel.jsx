@@ -38,14 +38,14 @@ export default React.createClass({
       numItems: 6,
       numSlots: 6,
       respawnThreshold: 12,
-      fullscreen: false,
       prefixes: {
         flex: 'flex',
         flexShrink: 'flexShrink',
         flexGrow: 'flexGrow',
         alignItems: 'alignItems',
         justifyContent: 'justifyContent',
-        transform: 'transform'}
+        transform: 'transform'
+      }
     };
   },
 
