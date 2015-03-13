@@ -119,8 +119,12 @@ export default React.createClass({
 
   propTypes: {
     index: React.PropTypes.number.isRequired,
-    seed: React.PropTypes.string.isRequired,
-    hp: React.PropTypes.number.isRequired
+    // seed: React.PropTypes.number.isRequired,
+    // hp: React.PropTypes.number.isRequired,
+    data: React.PropTypes.shape({
+      seed: React.PropTypes.number,
+      hp: React.PropTypes.number
+    }).isRequired
   },
 
   getDefaultProps() {
@@ -130,17 +134,17 @@ export default React.createClass({
   },
 
   getInitialState() {
-    return generateRandomPolygonFromSeed(this.props.seed);
+    return generateRandomPolygonFromSeed(this.props.data.seed);
   },
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.seed !== nextProps.seed) {
+    if (this.props.data.seed !== nextProps.data.seed) {
       this.setState(generateRandomPolygonFromSeed(nextProps.seed));
     }
   },
 
   handleClick() {
-    if (this.props.hp > 0) CarouselActions.hit(this.props.index);
+    if (this.props.data.hp > 0) CarouselActions.hit(this.props.index);
   },
 
   containerStyle() {
@@ -154,16 +158,16 @@ export default React.createClass({
   // ition durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
     return {
-      [this.props.prefixes.transform]: `rotate(${this.props.hp * 137}deg)`,
-      transition: `all ${this.props.hp * 150}ms ${tweeners.friction}`
+      [this.props.prefixes.transform]: `rotate(${this.props.data.hp * 137}deg)`,
+      transition: `all ${this.props.data.hp * 150}ms ${tweeners.friction}`
     };
   },
 
   shrinkStyle() {
     let transition;
-    if (this.props.hp > 0) {
+    if (this.props.data.hp > 0) {
       // a little overshoot at the end of this animation looks nice...
-      transition = `all ${this.props.hp * 150}ms ${tweeners.bounce}`;
+      transition = `all ${this.props.data.hp * 150}ms ${tweeners.bounce}`;
     } else {
       // ...but we don't want to turn ourselves inside-out when we scale
       // to zero!
@@ -171,8 +175,8 @@ export default React.createClass({
     }
     return {
       [this.props.prefixes.transform]:
-        `scale(${this.props.hp},${this.props.hp})`,
-      strokeWidth: 4 / this.props.hp,
+        `scale(${this.props.data.hp},${this.props.data.hp})`,
+      strokeWidth: 4 / this.props.data.hp,
       transition: transition
     };
   },

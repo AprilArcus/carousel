@@ -328,6 +328,7 @@ export default React.createClass({
                   Math.floor(sliceIndex / this.state.items.size)}
              index={storeIndex}
              style={this.itemStyle()}
+             data={shape}
              hp={shape.hp}
              seed={shape.seed}
              prefixes={this.props.prefixes} />);

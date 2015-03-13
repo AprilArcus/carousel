@@ -12,7 +12,7 @@ let _shapes = Immutable.List();
 
 class Shape extends Immutable.Record({seed: undefined, hp: undefined}) {
   static random() {
-    return new Shape({seed: String(Math.random()),
+    return new Shape({seed: Math.random(),
                       hp: Math.floor(2 + 5 * Math.random())});
   }
   get dead() {
