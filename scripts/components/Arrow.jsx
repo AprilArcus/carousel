@@ -24,12 +24,12 @@ export default React.createClass({
     const style = {
       opacity: 1.0,
       transition: 'all 150ms ease-in',
-      fill: '#fff',
-      mixBlendMode: 'difference'
+      fill: '#fff'
+      // mixBlendMode: 'difference'
     };
     if (this.props.disabled) {
-      style.opacity = 0.5,
-      style.transition = 'none'
+      style.opacity = 0.5;
+      style.transition = 'none';
     }
     return style;
   },
