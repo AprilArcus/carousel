@@ -334,16 +334,16 @@ export default React.createClass({
   },
 
   render() {
-    const arrowsDisabled = (this.state.sliding !==
+    const disabledArrows = (this.state.sliding !==
                             this.enums.sliding.STOPPED) ||
                            this.state.gameOver;
     return <div style={this.containerStyle()}
                 onClick={this.handleGenericInteraction}>
              <div style={this.endCapStyle()}>
-               <Arrow direction={'left'}
-                      style={this.staticStyles.arrow}
-                      disabled={arrowsDisabled}
-                      clickHandler={this.slideBackward} />
+               <Arrow style={this.staticStyles.arrow}
+                      direction={'left'}
+                      clickHandler={this.slideBackward}
+                      disabled={disabledArrows} />
              </div>
              <div style={this.stockStyle()}>
                <div ref="slider"
@@ -366,20 +366,20 @@ export default React.createClass({
                </div>
              </div>
              <div style={this.endCapStyle()}>
-               <Arrow direction={'right'}
-                      style={this.staticStyles.arrow}
-                      disabled={arrowsDisabled}
-                      clickHandler={this.slideForward} />
+               <Arrow style={this.staticStyles.arrow}
+                      direction={'right'}
+                      clickHandler={this.slideForward}
+                      disabled={disabledArrows} />
              </div>
              <div style={this.staticStyles.buttonGroup}>
-               <Button bsSize="large"
+               <Button style={this.staticStyles.button}
                        bsStyle="default"
-                       style={this.staticStyles.button}
+                       bsSize="large"
                        value="Reset"
                        onClick={this.handleReset} />
-               <Button bsSize="large"
+               <Button style={this.staticStyles.button}
                        bsStyle="default"
-                       style={this.staticStyles.button}
+                       bsSize="large"
                        value="Clear"
                        onClick={this.handleClear}
                        disabled={this.state.gameOver} />
