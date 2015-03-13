@@ -45,7 +45,7 @@ of interest:
   plain‐old‐javascript accessor syntax.
 
 * All sources are written in ES6 and compiled to ES5 with [Babel](babeljs.io).
-  This project rely heavily on many ES6 features — note the use of
+  This project relies heavily on many ES6 features — note the use of
   destructuring assignment in Carousel.jsx `renderItems()` and
   CarouselStore.jsx `respawn()`, and pervasive use of computed property
   names, template strings and `Object.assign` throughout the inline
