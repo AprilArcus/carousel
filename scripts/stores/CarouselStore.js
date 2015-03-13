@@ -15,7 +15,7 @@ class Shape extends Immutable.Record({seed: undefined, hp: undefined}) {
     return new Shape({seed: String(Math.random()),
                       hp: Math.floor(2 + 5 * Math.random())});
   }
-  isDead() {
+  get dead() {
     return this.hp <= 0;
   }
 }
@@ -32,8 +32,8 @@ function respawn() {
   const candidateIndices = _shapes.toKeyedSeq()
                                   .map( (shape, index) => [shape, index] )
                                   .toIndexedSeq()
-                                  .filter( ([shape, _]) => shape.isDead() ) //eslint-disable-line no-unused-vars
-                                  .map( ([_, index]) => index )             //eslint-disable-line no-unused-vars
+                                  .filter( ([shape, _]) => shape.dead ) //eslint-disable-line no-unused-vars
+                                  .map( ([_, index]) => index )         //eslint-disable-line no-unused-vars
                                   .cacheResult();
   if (candidateIndices.size > 0) {
     const randomIndexIntoCandidateIndices = Math.floor(Math.random() * candidateIndices.size);
@@ -51,7 +51,7 @@ function hit(index) {
 const CarouselStore = Object.assign({}, EventEmitter.prototype, {
 
   isEmpty() {
-    return _shapes.every(shape => shape.isDead() );
+    return _shapes.every(shape => shape.dead );
   },
 
   get() {
