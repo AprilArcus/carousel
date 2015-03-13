@@ -83,7 +83,7 @@ variables.btn.danger.color   = '#fff';                                  // ln 16
 variables.btn.danger.bg      = variables.brand.danger;                  // ln 168
 variables.btn.danger.border  = darken(variables.btn.danger.bg, 5);      // ln 169
 
-variables.btn.link = {disabled: {color: variables.gray.light}}          // ln 171
+variables.btn.link = {disabled: {color: variables.gray.light}};         // ln 171
 
 variables.cursor = {disabled: 'not-allowed'};                           // ln 222
 
