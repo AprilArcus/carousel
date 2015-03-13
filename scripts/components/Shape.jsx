@@ -118,9 +118,7 @@ export default React.createClass({
   mixins: [PureRenderMixin],
 
   propTypes: {
-    index: React.PropTypes.number.isRequired,
-    // seed: React.PropTypes.number.isRequired,
-    // hp: React.PropTypes.number.isRequired,
+    storeIndex: React.PropTypes.number.isRequired,
     data: React.PropTypes.shape({
       seed: React.PropTypes.number,
       hp: React.PropTypes.number
@@ -144,7 +142,7 @@ export default React.createClass({
   },
 
   handleClick() {
-    if (this.props.data.hp > 0) CarouselActions.hit(this.props.index);
+    if (this.props.data.hp > 0) CarouselActions.hit(this.props.storeIndex);
   },
 
   containerStyle() {

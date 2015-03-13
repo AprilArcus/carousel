@@ -326,11 +326,9 @@ export default React.createClass({
       // indices out of an infinite list, so we'll live with it for now.
       <Shape key={storeIndex + this.state.items.size *
                   Math.floor(sliceIndex / this.state.items.size)}
-             index={storeIndex}
+             storeIndex={storeIndex}
              style={this.itemStyle()}
              data={shape}
-             hp={shape.hp}
-             seed={shape.seed}
              prefixes={this.props.prefixes} />);
   },
 
