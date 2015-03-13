@@ -38,7 +38,6 @@ export default React.createClass({
       numItems: 6,
       numSlots: 6,
       respawnThreshold: 12,
-      slideDuration: 150,
       fullscreen: false,
       prefixes: {
         flex: 'flex',
