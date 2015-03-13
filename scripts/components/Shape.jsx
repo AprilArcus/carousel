@@ -149,9 +149,9 @@ export default React.createClass({
                          this.props.style);           // have z-index
   },
 
-  // In this and the follow function, we scale up in proportion to the
-  // shape's hitpoints, and also use hitpoints as a factor on transition
-  // durations. This provides a nice feeling of mass and inertia.
+  // In this and the following function, we scale up in proportion to
+  // the shape's hitpoints, and also use hitpoints as a factor on trans-
+  // ition durations. This provides a nice feeling of mass and inertia.
   spinStyle() {
     return {
       [this.props.prefixes.transform]: `rotate(${this.props.hp * 137}deg)`,
