@@ -122,7 +122,10 @@ export default React.createClass({
     data: React.PropTypes.shape({
       seed: React.PropTypes.number,
       hp: React.PropTypes.number
-    }).isRequired
+    }).isRequired,
+    prefixes: React.PropTypes.shape({
+      transform: React.PropTypes.string
+    })
   },
 
   getDefaultProps() {
