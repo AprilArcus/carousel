@@ -29,7 +29,7 @@ variables.font_size = {};
 variables.font_size.base  = 14;                                         // ln 51
 variables.font_size.large = Math.ceil(variables.font_size.base * 1.25); // ln 52
 variables.font_size.small = Math.ceil(variables.font_size.base * 0.85); // ln 53
-variables.font_size.tiny  = variables.font_size.small
+variables.font_size.tiny  = variables.font_size.small;
 
 variables.line_height = {};
 variables.line_height.base     = 1.428571429;                           // ln 63
