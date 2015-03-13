@@ -346,7 +346,8 @@ export default React.createClass({
                       clickHandler={this.slideBackward} />
              </div>
              <div style={this.stockStyle()}>
-               <div ref="slider" style={this.sliderStyle()}>
+               <div ref="slider"
+                    style={this.sliderStyle()}>
                  {this.renderItems()}
                </div>
                <div style={this.messageContainerStyle()}>
@@ -371,17 +372,17 @@ export default React.createClass({
                       clickHandler={this.slideForward} />
              </div>
              <div style={this.staticStyles.buttonGroup}>
-               <Button style={this.staticStyles.button}
-                       bsSize="large"
-                       bsStyle="default"
-                       value="Reset"
-                       onClick={this.handleReset} />
-               <Button value="Clear"
-                       bsSize="large"
+               <Button bsSize="large"
                        bsStyle="default"
                        style={this.staticStyles.button}
-                       disabled={this.state.gameOver}
-                       onClick={this.handleClear} />
+                       value="Reset"
+                       onClick={this.handleReset} />
+               <Button bsSize="large"
+                       bsStyle="default"
+                       style={this.staticStyles.button}
+                       value="Clear"
+                       onClick={this.handleClear}
+                       disabled={this.state.gameOver} />
              </div>
            </div>;
   }
