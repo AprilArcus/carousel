@@ -51,10 +51,10 @@ of interest:
   names, template strings and `Object.assign` throughout the inline
   styling system.
 
-* Tested in desktop Chrome‐latest, Safari‐latest and Firefox‐latest.
-  Certain not to work on IE9 or lower due to dependency on flexbox
+* Tested in desktop Chrome 41, Safari 8 and Firefox 36.
+  Certain not to work on IE 9 or lower due to dependency on flexbox
   support (although see [this commit](https://github.com/AprilArcus/carousel/commit/c2ec3c6ad26d885f00ca8abea896bf8dcae12c5e) for an approach utilizing
-  `display: table-cell;`). IE10+ support is probably realistic, and the
+  `display: table-cell;`). IE 10 support is probably realistic, and the
   path toward supporting prefixed CSS in a general way while maintaing
   the purity of `render()` is clear: we detect prefixes before
   initializing React and then pass a key‐value store from standard
