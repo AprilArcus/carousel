@@ -31,7 +31,7 @@ of interest:
   event listener. This calls `Carousel.onChange()`, which retrieves the
   new state from store, triggering a re‐render and propogating updated
   state into its `components/Shape.jsx` children. Because all components
-  implement PureRenderMixin, React is able to avoid unecessarily
+  implement PureRenderMixin, React is able to avoid unnecessarily
   re‐rendering unchanged elements.
 
 * Immutable.js has an API for functional manipulation of data
