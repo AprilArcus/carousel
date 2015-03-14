@@ -96,13 +96,13 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   return points;
 }
 
-function generateRandomPolygonFromSeed(seed) {
-  const rng = seedrandom(seed);
+function generateRandomPolygon(data) {
+  const rng = seedrandom(data.seed);
   const hue = Math.floor(rng() * 360);
   const zIndex = Math.floor(rng() * 100);
   const irregularity = rng() * 0.8;
   const spikeyness = rng() * 0.6;
-  const numVerts = Math.floor(3 + rng() * 5);
+  const numVerts = data.hp + 2;
   const vertices = randomPolygon(0, 0, 25, irregularity, spikeyness,
                                  numVerts, rng);
   const points = vertices.map(vertex => vertex.join(',')).join(' ');
@@ -135,13 +135,11 @@ export default React.createClass({
   },
 
   getInitialState() {
-    return generateRandomPolygonFromSeed(this.props.data.seed);
+    return generateRandomPolygon(this.props.data);
   },
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.data.seed !== nextProps.data.seed) {
-      this.setState(generateRandomPolygonFromSeed(nextProps.data.seed));
-    }
+    this.setState(generateRandomPolygon(nextProps.data));
   },
 
   handleClick() {
