@@ -36,19 +36,16 @@ of interest:
 
 * Immutable.js has an API for functional manipulation of data
   structures, superior in many respects to underscore/lodash. In
-  particular, support for infinite sequences and lazy evaluation allows
-  us to effortlessly circularize the backing store with
-  `Immutable.Repeat()` and slice into it, enabling large elements to
-  appear on both the left and right side of the screen.
-  `Immutable.Record` provides an immutable data structure whose member
-  variables can be transparently consumed by any client using
-  plain‐old‐javascript accessor syntax.
+  particular, `Immutable.Record` provides an immutable data structure
+  whose member variables can be transparently consumed by any client
+  using plain‐old‐javascript accessor syntax, including the
+  React.PropTypes.shape() type checker function.
 
 * All sources are written in ES6 and compiled to ES5 with [Babel](babeljs.io).
   This project relies heavily on many ES6 features — note the use of
-  destructuring assignment in CarouselStore.jsx, and pervasive use of
-  computed property names, template strings and `Object.assign`
-  throughout the inline styling system.
+  classes and destructuring assignment in CarouselStore.jsx, and
+  pervasive use of computed property names, template strings and
+  `Object.assign` throughout the inline styling system.
 
 * Tested in desktop Chrome 41, Safari 8 and Firefox 36.
   Certain not to work on IE 9 or lower due to dependency on flexbox

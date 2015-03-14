@@ -112,29 +112,37 @@ class CarouselStore extends EventEmitter {
     return _shapes.every(shape => shape.dead );
   }
 
-  getCircularizedSliceWithUniqueKeysAndStoreIndices(startIndex, endIndex) {
+  getCircularizedSlice(startIndex, endIndex) {
+    if (_shapes.size === 0) return [];
     // A unique and stable key is useful to our React client, in that it
     // obviates unecessary DOM operations. If our client didn't want to
     // pad out its view to allow wrapping, the storeIndex would be fine
     // by itself, but since some shapes will be rendered twice, we take
-    // extra care here. There is still one in/del per slide with this
-    // key, which wouldn't be necessary provided we aren't concerned
-    // about loss-of-precision errors (it would take 40 million years to
-    // lose integer precision on a double precision float at 150ms per
-    // slide) but immutable.js crashes when I try to slice negative
-    // indices out of an infinite list, so we'll live with it for now.
-    if (_shapes.size === 0) return [];
-    const muxed = _shapes.toKeyedSeq().map( (shape, storeIndex) =>
-                                            [shape, storeIndex] );
-    const circularized = Immutable.Repeat(muxed).flatten(1);
-    const slice = circularized.slice(startIndex, endIndex);
-    return slice.map( ([shape, storeIndex], sliceIndex) => {
-      return {
-        shape: shape,
-        storeIndex: storeIndex,
-        key: storeIndex +
-             _shapes.size * Math.floor(sliceIndex / _shapes.size)
-      };
+    // extra care to provide both a valid index into the original store
+    // (for use by downstream components calling CarouselActions.hit())
+    // and a stable unique index into a notional, virtual array spanning
+    // indices [-2^52, 2^52].
+
+    // The means that the slice API is a little different than usual, in
+    // that negative indices slice from the left of zero, not the right
+    // of a notionally infinite list. i.e. if _shapes = [1,2,3,4],
+    // getCircularizedSlice(-1,3) returns [4,1,2,3].
+
+    // First we bias in the incoming indices:
+    const HALF_INT_MAX = 4503599627370496; // 2^52
+    // At 150ms per slide, it will take 21.4 million years to lose
+    // integer precision.
+    if (startIndex < -HALF_INT_MAX || endIndex > HALF_INT_MAX) {
+      throw new RangeError('loss of precision');
+    }
+    const biasedStartIndex = startIndex + HALF_INT_MAX;
+    const biasedEndIndex = endIndex + HALF_INT_MAX;
+    const indices = Immutable.Range(biasedStartIndex, biasedEndIndex);
+    return indices.map( sliceIndex => {
+      const storeIndex = sliceIndex % _shapes.size;
+      const shape = _shapes.get(storeIndex);
+      const unbiasedSliceIndex = sliceIndex - HALF_INT_MAX;
+      return {shape, storeIndex, sliceIndex: unbiasedSliceIndex};
     }).toArray();
   }
 

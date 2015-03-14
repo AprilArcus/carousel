@@ -162,13 +162,9 @@ export default React.createClass({
 
   stopSlide() {
     if (this.state.sliding === this.enums.sliding.BACKWARD) {
-      const newOffsetIndex =
-        (this.state.offsetIndex - 1 + this.props.numItems) % this.props.numItems;
-      this.setState({offsetIndex: newOffsetIndex});
+      this.setState({offsetIndex: this.state.offsetIndex - 1});
     } else if (this.state.sliding === this.enums.sliding.FORWARD) {
-      const newOffsetIndex =
-        (this.state.offsetIndex + 1) % this.props.numItems;
-      this.setState({offsetIndex: newOffsetIndex});
+      this.setState({offsetIndex: this.state.offsetIndex + 1});
     }
     this.setState({sliding: this.enums.sliding.STOPPED});
   },
@@ -304,30 +300,27 @@ export default React.createClass({
 
   getItems() {
     const slice =
-        CarouselStore.getCircularizedSliceWithUniqueKeysAndStoreIndices(
+        CarouselStore.getCircularizedSlice(
           this.state.offsetIndex,
           this.state.offsetIndex + this.props.numSlots + 4);
-
     // asserting the structure of our incoming data at the API boundary
     if (process.env.NODE_ENV !== 'production') {
-      if (!(slice.constructor === Array) && slice.every(item =>
-            (typeof item === 'object') &&
-            (typeof item.key === 'number') &&
-            (typeof item.storeIndex === 'number') &&
-            (typeof item.shape === 'object')
-          )) {
+      if (!(slice.constructor === Array && slice.every(item =>
+            typeof item === 'object' &&
+            typeof item.sliceIndex === 'number' &&
+            typeof item.storeIndex === 'number' &&
+            typeof item.shape === 'object'))) {
         throw new Error('Malformed data from Store, expected Array ' +
                         'of {key: number, storeIndex: number, shape: ' +
                         'object}');
       }
     }
-
     return slice;
   },
 
   renderItems() {
-    return this.getItems().map( ({shape, key, storeIndex}) =>
-      <Shape key={key}
+    return this.getItems().map( ({shape, sliceIndex, storeIndex}) =>
+      <Shape key={sliceIndex}
              storeIndex={storeIndex}
              style={this.itemStyle()}
              data={shape}
