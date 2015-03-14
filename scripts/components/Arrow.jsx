@@ -1,6 +1,7 @@
 /* eslint-env es6 */
 import React from 'react';
-import { PureRenderMixin } from 'react/addons';
+import { addons } from 'react/addons';
+const PureRenderMixin = addons.PureRenderMixin;
 
 const points = {
   left: '81,13 0,48 99,90 49,47',

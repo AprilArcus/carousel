@@ -1,8 +1,10 @@
 /* eslint-env es6 */
 import React from 'react';
-import { PureRenderMixin } from 'react/addons';
+import { addons } from 'react/addons';
+const PureRenderMixin = addons.PureRenderMixin;
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import CarouselActions from '../actions/CarouselActions';
+import shallowEqual from 'react/lib/shallowEqual';
 
 // a quick and dirty non-cryptographically secure seeded rng with an
 // API after David Bau's https://www.npmjs.com/package/seedrandom
@@ -134,21 +136,13 @@ export default React.createClass({
     };
   },
 
-  getInitialState() {
-    return generateRandomPolygon(this.props.data);
-  },
-
-  componentWillReceiveProps(nextProps) {
-    this.setState(generateRandomPolygon(nextProps.data));
-  },
-
   handleClick() {
     if (this.props.data.hp > 0) CarouselActions.hit(this.props.storeIndex);
   },
 
-  containerStyle() {
+  containerStyle(zIndex) {
     return Object.assign({position: 'relative',       // only positioned
-                          zIndex: this.state.zIndex}, // elements can
+                          zIndex: zIndex}, // elements can
                          this.props.style);           // have z-index
   },
 
@@ -180,22 +174,23 @@ export default React.createClass({
     };
   },
 
-  polygonStyle() {
+  polygonStyle(hue) {
     return {
-      fill: `hsl(${this.state.hue},100%,50%)`,
-      stroke: `hsl(${this.state.hue},100%,25%)`
+      fill: `hsl(${hue},100%,50%)`,
+      stroke: `hsl(${hue},100%,25%)`
     };
   },
 
   render() {
+    const {hue, points, zIndex} = generateRandomPolygon(this.props.data);
     return <div ref="component"
-                style={this.containerStyle()}>
+                style={this.containerStyle(zIndex)}>
              <svg width="100%"
                   viewBox="-50 -50 100 100"
                   style={Object.assign({overflow: 'visible'},
                                        this.spinStyle())} >
-               <polygon points={this.state.points}
-                        style={Object.assign(this.polygonStyle(),
+               <polygon points={points}
+                        style={Object.assign(this.polygonStyle(hue),
                                              this.shrinkStyle())}
                         onClickCapture={this.handleClick} />
              </svg>

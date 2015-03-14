@@ -1,6 +1,7 @@
 /* eslint-env es6 */
 import React from 'react';
-import { PureRenderMixin } from 'react/addons';
+import { addons } from 'react/addons';
+const PureRenderMixin = addons.PureRenderMixin;
 import keyMirror from 'react/lib/keyMirror';
 import ReactTransitionEvents from 'react/lib/ReactTransitionEvents';
 import Immutable from 'immutable';
@@ -62,8 +63,15 @@ export default React.createClass({
       sliding: this.enums.sliding.STOPPED,
       offsetIndex: 0,
       genericInteractions: 0,
-      gameOver: false
-    };
+      gameOver: false,
+      itemStyle: this.itemStyle() // calculate this once so that we can
+    };                            // maintain strict object equality
+  },                              // when we pass it to our children.
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.numSlots !== nextProps.numSlots) {
+      this.setState({itemStyle: this.itemStyle()});
+    }
   },
 
   componentDidMount() {
@@ -95,9 +103,15 @@ export default React.createClass({
 
   onChange() {
     this.setState({gameOver: CarouselStore.empty});
-    // necessary since we don't actually keep a copy of the carousel
+
+    // Necessary since we don't actually keep a copy of the carousel
     // items as props or state, but rather slice into CarouselStore
     // according to this.state.offsetIndex at render time.
+
+    // However, we could technically comment this out and the app's
+    // behavior would not visibly change, since handleGenericInteraction
+    // will still detect the click, mutate our state and trigger a
+    // re-render.
     this.forceUpdate();
   },
 
@@ -322,7 +336,7 @@ export default React.createClass({
     return this.getItems().map( ({shape, sliceIndex, storeIndex}) =>
       <Shape key={sliceIndex}
              storeIndex={storeIndex}
-             style={this.itemStyle()}
+             style={this.state.itemStyle}
              data={shape}
              prefixes={this.props.prefixes} />
     );
