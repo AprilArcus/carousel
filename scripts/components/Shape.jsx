@@ -140,7 +140,7 @@ export default React.createClass({
 
   componentWillReceiveProps(nextProps) {
     if (this.props.data.seed !== nextProps.data.seed) {
-      this.setState(generateRandomPolygonFromSeed(nextProps.seed));
+      this.setState(generateRandomPolygonFromSeed(nextProps.data.seed));
     }
   },
 

@@ -300,6 +300,41 @@ export default React.createClass({
   },
 
   renderItems() {
+    // FIXME: This function violates the Law of Demeter pretty
+    // seriously - it requires very specific knowledge of the backing
+    // store to destructure it and obtain a unique key. How should we
+    // fix this? CarouselStore should provide a method
+    //
+    // getCircularizedSliceWithUniqueKeys(startIndex, endIndex) {
+    //   if (_shapes.size === 0) return [];
+    //   const muxed = _shapes.toKeyedSeq().map( (shape, storeIndex) =>
+    //                                           [shape, storeIndex] );
+    //   const circularized = Immutable.Repeat(muxed).flatten(1)
+    //   const slice = circularized.slice(startIndex, endIndex);
+    //   return slice.map( ([shape, storeIndex], sliceIndex) => {
+    //     return {
+    //       shape: shape,
+    //       key: storeIndex +
+    //            _shapes.size * Math.floor(sliceIndex / _shapes.size)
+    //     };
+    //   }).toArray();
+    // }
+    //
+    // which we could call here and then consume. At the very least this
+    // keeps the data structure logic in one place and presents an API
+    // to the component with reasonable names for things.
+    //
+    // However: if we think about it this way, Carousel's state is
+    // really just the offset index; it never needs to fetch the backing
+    // store at all, except as a formality to invalidate its state and
+    // trigger a re-render that will propagate into its components.
+    // This feels wrong too! We could get around that by calling
+    // forceUpdate() from onChange(), which is maybe the least wrong
+    // way to go?
+    //
+    // ALSO, CRUCIALLY: Why does Immutable.Repeat(foo).flatten(1); work
+    // here but apparently nowhere else, including the Node REPL???
+
     // suppress render until the backing store is initialized
     if (this.state.items === undefined) return [];
 
