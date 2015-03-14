@@ -29,7 +29,7 @@ of interest:
   need to be concerned with managing their state — whenever the store
   is altered, it emits a change event received by the master component's
   event listener. This calls `Carousel.onChange()`, which retrieves the
-  new state from store, triggering a re‐render and propogating updated
+  new state from store, triggering a re‐render and propagating updated
   state into its `components/Shape.jsx` children. Because all components
   implement PureRenderMixin, React is able to avoid unnecessarily
   re‐rendering unchanged elements.

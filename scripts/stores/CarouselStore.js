@@ -8,8 +8,16 @@ import Immutable from 'immutable';
 
 const CHANGE_EVENT = 'change';
 
-let _shapes = Immutable.List();
+let _dispatchToken;
 
+
+// Immutable.js Record types look like plain-old-javascript objects to
+// our clients, but throw when you try to set their properties. The
+// illusion isn't perfect, however - e.g. Object.keys(someRecord) will
+// just return [ '_map' ]. Still, it's good enough to pass React's
+// React.PropTypes.shape({key: value}) test. We extend it with an ES6
+// class to provide a factory methd to vend random shapes, and a getter
+// to keep things DRY.
 class Shape extends Immutable.Record({seed: undefined, hp: undefined}) {
   static random() {
     return new Shape({seed: Math.random(),
@@ -19,6 +27,17 @@ class Shape extends Immutable.Record({seed: undefined, hp: undefined}) {
     return this.hp <= 0;
   }
 }
+
+// _shapes is the backing store. It, and its mutator functions, are
+// hidden in the scope of the module closure. In OO terms they are like
+// private setter functions, never called directly by our React
+// Component clients, but rather registered as callbacks with the
+// AppDispatcher singleton and then triggered by calling the public
+// methods on CarouselActions, which delegates to AppDispatcher. This
+// divides getter and setter functionality between CarouselStore and
+// CarouselActions, respectively, enforcing Flux's signature
+// unidirectional flow of data.
+let _shapes = Immutable.List();
 
 function reset(numItems) {
   _shapes = _shapes.setSize(numItems).map( () => Shape.random() );
@@ -48,11 +67,50 @@ function hit(index) {
   _shapes = _shapes.set(index, updatedShape);
 }
 
-const CarouselStore = Object.assign({}, EventEmitter.prototype, {
+// h/t Bill Fisher for the ES6 class approach, which reads somewhat
+// clearer than the minimalist ES5 approach in the reference
+// implementaiton in examples/flux-todomvc/js/stores/TodoStore.js
+// https://speakerdeck.com/fisherwebdev/flux-react
+class CarouselStore extends EventEmitter {
 
-  isEmpty() {
+  constructor() {
+    super(); // <-- why?
+    // register callbacks
+    _dispatchToken = AppDispatcher.register((action) => {
+      switch(action.actionType) {
+
+        case CarouselConstants.CAROUSEL_RESET:
+          reset(action.numItems);
+          this.emit(CHANGE_EVENT);
+          break;
+
+        case CarouselConstants.CAROUSEL_CLEAR:
+          clear();
+          this.emit(CHANGE_EVENT);
+          break;
+
+        case CarouselConstants.CAROUSEL_RESPAWN:
+          respawn();
+          this.emit(CHANGE_EVENT);
+          break;
+
+        case CarouselConstants.CAROUSEL_HIT:
+          hit(action.index);
+          this.emit(CHANGE_EVENT);
+          break;
+
+        // no default
+      }
+    });
+  }
+
+  get dispatchToken() {
+    return _dispatchToken;
+  }
+
+  get empty() {
     return _shapes.every(shape => shape.dead );
-  },
+  }
 
   getCircularizedSliceWithUniqueKeysAndStoreIndices(startIndex, endIndex) {
     // A unique and stable key is useful to our React client, in that it
@@ -78,48 +136,15 @@ const CarouselStore = Object.assign({}, EventEmitter.prototype, {
              _shapes.size * Math.floor(sliceIndex / _shapes.size)
       };
     }).toArray();
-  },
-
-  emitChange() {
-    this.emit(CHANGE_EVENT);
-  },
+  }
 
   addChangeListener(callback) {
     this.on(CHANGE_EVENT, callback);
-  },
+  }
 
   removeChangeListener(callback) {
     this.removeListener(CHANGE_EVENT, callback);
   }
+}
 
-});
-
-// register callbacks
-AppDispatcher.register(function(action) {
-  switch(action.actionType) {
-
-    case CarouselConstants.CAROUSEL_RESET:
-      reset(action.numItems);
-      CarouselStore.emitChange();
-      break;
-
-    case CarouselConstants.CAROUSEL_CLEAR:
-      clear();
-      CarouselStore.emitChange();
-      break;
-
-    case CarouselConstants.CAROUSEL_RESPAWN:
-      respawn();
-      CarouselStore.emitChange();
-      break;
-
-    case CarouselConstants.CAROUSEL_HIT:
-      hit(action.index);
-      CarouselStore.emitChange();
-      break;
-
-    // no default
-  }
-});
-
-export default CarouselStore;
+export default new CarouselStore();

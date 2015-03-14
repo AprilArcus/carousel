@@ -94,8 +94,11 @@ export default React.createClass({
   },
 
   onChange() {
+    this.setState({gameOver: CarouselStore.empty});
+    // necessary since we don't actually keep a copy of the carousel
+    // items as props or state, but rather slice into CarouselStore
+    // according to this.state.offsetIndex at render time.
     this.forceUpdate();
-    this.setState({gameOver: CarouselStore.isEmpty()});
   },
 
   handleKeyDown(event) {
@@ -299,22 +302,31 @@ export default React.createClass({
     }
   },
 
-  renderItems() {
-    // Fetch the items we need.
-    // We fetch four extra -- two on each side -- to mitigate pop-in.
-
+  getItems() {
     const slice =
         CarouselStore.getCircularizedSliceWithUniqueKeysAndStoreIndices(
           this.state.offsetIndex,
           this.state.offsetIndex + this.props.numSlots + 4);
 
-    // We should assert the structure of `slice` here somehow.
-    // unfortunately, propTypes can only be invoked at component
-    // boundaries... should the slider and stock be separate
-    // components??
+    // asserting the structure of our incoming data at the API boundary
+    if (process.env.NODE_ENV !== 'production') {
+      if (!(slice.constructor === Array) && slice.every(item =>
+            (typeof item === 'object') &&
+            (typeof item.key === 'number') &&
+            (typeof item.storeIndex === 'number') &&
+            (typeof item.shape === 'object')
+          )) {
+        throw new Error('Malformed data from Store, expected Array ' +
+                        'of {key: number, storeIndex: number, shape: ' +
+                        'object}');
+      }
+    }
 
-    // ...and render them:
-    return slice.map( ({shape, key, storeIndex}) =>
+    return slice;
+  },
+
+  renderItems() {
+    return this.getItems().map( ({shape, key, storeIndex}) =>
       <Shape key={key}
              storeIndex={storeIndex}
              style={this.itemStyle()}
