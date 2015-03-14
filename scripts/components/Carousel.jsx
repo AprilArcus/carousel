@@ -63,10 +63,12 @@ export default React.createClass({
       sliding: this.enums.sliding.STOPPED,
       offsetIndex: 0,
       genericInteractions: 0,
-      gameOver: false,
+      gameOver: false,            // STUPID HACK ALERT
       itemStyle: this.itemStyle() // calculate this once so that we can
     };                            // maintain strict object equality
   },                              // when we pass it to our children.
+                                  // TODO: purify and memoize all style
+                                  //       functions
 
   componentWillReceiveProps(nextProps) {
     if (this.props.numSlots !== nextProps.numSlots) {
