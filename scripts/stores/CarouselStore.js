@@ -54,8 +54,30 @@ const CarouselStore = Object.assign({}, EventEmitter.prototype, {
     return _shapes.every(shape => shape.dead );
   },
 
-  get() {
-    return _shapes;
+  getCircularizedSliceWithUniqueKeysAndStoreIndices(startIndex, endIndex) {
+    // A unique and stable key is useful to our React client, in that it
+    // obviates unecessary DOM operations. If our client didn't want to
+    // pad out its view to allow wrapping, the storeIndex would be fine
+    // by itself, but since some shapes will be rendered twice, we take
+    // extra care here. There is still one in/del per slide with this
+    // key, which wouldn't be necessary provided we aren't concerned
+    // about loss-of-precision errors (it would take 40 million years to
+    // lose integer precision on a double precision float at 150ms per
+    // slide) but immutable.js crashes when I try to slice negative
+    // indices out of an infinite list, so we'll live with it for now.
+    if (_shapes.size === 0) return [];
+    const muxed = _shapes.toKeyedSeq().map( (shape, storeIndex) =>
+                                            [shape, storeIndex] );
+    const circularized = Immutable.Repeat(muxed).flatten(1);
+    const slice = circularized.slice(startIndex, endIndex);
+    return slice.map( ([shape, storeIndex], sliceIndex) => {
+      return {
+        shape: shape,
+        storeIndex: storeIndex,
+        key: storeIndex +
+             _shapes.size * Math.floor(sliceIndex / _shapes.size)
+      };
+    }).toArray();
   },
 
   emitChange() {

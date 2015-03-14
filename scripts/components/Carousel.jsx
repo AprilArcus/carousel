@@ -94,8 +94,8 @@ export default React.createClass({
   },
 
   onChange() {
-    this.setState({items: CarouselStore.get(),
-                   gameOver: CarouselStore.isEmpty()});
+    this.forceUpdate();
+    this.setState({gameOver: CarouselStore.isEmpty()});
   },
 
   handleKeyDown(event) {
@@ -300,71 +300,27 @@ export default React.createClass({
   },
 
   renderItems() {
-    // FIXME: This function violates the Law of Demeter pretty
-    // seriously - it requires very specific knowledge of the backing
-    // store to destructure it and obtain a unique key. How should we
-    // fix this? CarouselStore should provide a method
-    //
-    // getCircularizedSliceWithUniqueKeys(startIndex, endIndex) {
-    //   if (_shapes.size === 0) return [];
-    //   const muxed = _shapes.toKeyedSeq().map( (shape, storeIndex) =>
-    //                                           [shape, storeIndex] );
-    //   const circularized = Immutable.Repeat(muxed).flatten(1)
-    //   const slice = circularized.slice(startIndex, endIndex);
-    //   return slice.map( ([shape, storeIndex], sliceIndex) => {
-    //     return {
-    //       shape: shape,
-    //       key: storeIndex +
-    //            _shapes.size * Math.floor(sliceIndex / _shapes.size)
-    //     };
-    //   }).toArray();
-    // }
-    //
-    // which we could call here and then consume. At the very least this
-    // keeps the data structure logic in one place and presents an API
-    // to the component with reasonable names for things.
-    //
-    // However: if we think about it this way, Carousel's state is
-    // really just the offset index; it never needs to fetch the backing
-    // store at all, except as a formality to invalidate its state and
-    // trigger a re-render that will propagate into its components.
-    // This feels wrong too! We could get around that by calling
-    // forceUpdate() from onChange(), which is maybe the least wrong
-    // way to go?
-    //
-    // ALSO, CRUCIALLY: Why does Immutable.Repeat(foo).flatten(1); work
-    // here but apparently nowhere else, including the Node REPL???
+    // Fetch the items we need.
+    // We fetch four extra -- two on each side -- to mitigate pop-in.
 
-    // suppress render until the backing store is initialized
-    if (this.state.items === undefined) return [];
+    const slice =
+        CarouselStore.getCircularizedSliceWithUniqueKeysAndStoreIndices(
+          this.state.offsetIndex,
+          this.state.offsetIndex + this.props.numSlots + 4);
 
-    // Fetch the items we need...
-    const withIndices = this.state.items.toKeyedSeq()
-                                        .map( (shape, storeIndex) =>
-                                              [shape, storeIndex] );
-    // (n.b. Immutable.Repeat always returns an IndexedSeq)
-    const circularized = Immutable.Repeat(withIndices).flatten(1);
-    // (we grab four extra -- two on each side -- to mitigate pop-in)
-    const slice = circularized.slice(this.state.offsetIndex,
-                                     this.state.offsetIndex
-                                       + this.props.numSlots + 4);
+    // We should assert the structure of `slice` here somehow.
+    // unfortunately, propTypes can only be invoked at component
+    // boundaries... should the slider and stock be separate
+    // components??
+
     // ...and render them:
-    return slice.toArray().map( ([shape, storeIndex], sliceIndex) =>
-      // a unique and stable key avoids unecessary DOM operations. If we
-      // didn't have padding, the storeIndex would be fine by itself,
-      // but since some shapes will be rendered twice, we take extra
-      // care here. There is still one in/del per slide with this key,
-      // which wouldn't be necessary provided we aren't concerned about
-      // loss-of-precision errors (it would take 40 million years to
-      // lose integer precision on a double precision float at 150ms per
-      // slide) but immutable.js crashes when I try to slice negative
-      // indices out of an infinite list, so we'll live with it for now.
-      <Shape key={storeIndex + this.state.items.size *
-                  Math.floor(sliceIndex / this.state.items.size)}
+    return slice.map( ({shape, key, storeIndex}) =>
+      <Shape key={key}
              storeIndex={storeIndex}
              style={this.itemStyle()}
              data={shape}
-             prefixes={this.props.prefixes} />);
+             prefixes={this.props.prefixes} />
+    );
   },
 
   render() {
