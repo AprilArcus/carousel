@@ -46,10 +46,9 @@ of interest:
 
 * All sources are written in ES6 and compiled to ES5 with [Babel](babeljs.io).
   This project relies heavily on many ES6 features — note the use of
-  destructuring assignment in Carousel.jsx `renderItems()` and
-  CarouselStore.jsx `respawn()`, and pervasive use of computed property
-  names, template strings and `Object.assign` throughout the inline
-  styling system.
+  destructuring assignment in CarouselStore.jsx, and pervasive use of
+  computed property names, template strings and `Object.assign`
+  throughout the inline styling system.
 
 * Tested in desktop Chrome 41, Safari 8 and Firefox 36.
   Certain not to work on IE 9 or lower due to dependency on flexbox
