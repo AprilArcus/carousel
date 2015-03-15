@@ -94,29 +94,6 @@ export default React.createClass({
     window.addEventListener('keydown', this.handleKeyDown);
   },
 
-  componentWillUnmount() {
-    CarouselStore.removeChangeListener(this.onChange);
-
-    const sliderNode = React.findDOMNode(this.refs.slider);
-    ReactTransitionEvents.removeEndEventListener(sliderNode, this.stopSlide);
-
-    window.removeEventListener('keydown', this.handleKeyDown);
-  },
-
-  onChange() {
-    this.setState({gameOver: CarouselStore.empty});
-
-    // Necessary since we don't actually keep a copy of the carousel
-    // items as props or state, but rather slice into CarouselStore
-    // according to this.state.offsetIndex at render time.
-
-    // However, we could technically comment this out and the app's
-    // behavior would not visibly change, since handleGenericInteraction
-    // will still detect the click, mutate our state and trigger a
-    // re-render.
-    this.forceUpdate();
-  },
-
   handleKeyDown(event) {
     // ...and attempt to mitigate the most questionable aspect of this
     // approach with a guard clause against the possibility of another
@@ -147,6 +124,29 @@ export default React.createClass({
         this.handleGenericInteraction(event);
       }
     }
+  },
+
+  componentWillUnmount() {
+    CarouselStore.removeChangeListener(this.onChange);
+
+    const sliderNode = React.findDOMNode(this.refs.slider);
+    ReactTransitionEvents.removeEndEventListener(sliderNode, this.stopSlide);
+
+    window.removeEventListener('keydown', this.handleKeyDown);
+  },
+
+  onChange() {
+    this.setState({gameOver: CarouselStore.empty});
+
+    // Necessary since we don't actually keep a copy of the carousel
+    // items as props or state, but rather slice into CarouselStore
+    // according to this.state.offsetIndex at render time.
+
+    // However, we could technically comment this out and the app's
+    // behavior would not visibly change, since handleGenericInteraction
+    // will still detect the click, mutate our state and trigger a
+    // re-render.
+    this.forceUpdate();
   },
 
   handleGenericInteraction(event) {
@@ -309,8 +309,8 @@ export default React.createClass({
       zIndex: 100 // c.f. comment in endCapStyle()
     },
     button: {                            // Safari disables subpixel
-      margin: '8px 4px',                 // aliasing during animations,
-      WebkitFontSmoothing: 'antialiased' // to jarring effect.
+      margin: '8px 4px',                 // antialiasing during anima-
+      WebkitFontSmoothing: 'antialiased' // tions, to jarring effect.
     }
   },
 
