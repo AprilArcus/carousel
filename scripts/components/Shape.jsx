@@ -30,7 +30,8 @@ function reductions(callback, initial, array) {
   return result;
 }
 
-// An ES6 translation of Mike Ounsworth's random polygon algorithm
+// An ES6 translation of Mike Ounsworth's random polygon algorithm.
+// Comments original, algorithm lightly adapted to functional style.
 // c.f. http://stackoverflow.com/a/25276331
 function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
                        spikeyness, numVerts, rng) {
@@ -84,7 +85,7 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   const k = sum / (2 * Math.PI);
   const normalizedAngleSteps = angleSteps.map(e => e / k);
 
-  // now generate the points.
+  // now generate the points
   const angles = reductions((x, y) => x + y,
                             uniform(0, 2 * Math.PI),
                             normalizedAngleSteps).slice(0, -1);
@@ -141,9 +142,9 @@ export default React.createClass({
   },
 
   containerStyle(zIndex) {
-    return Object.assign({position: 'relative',       // only positioned
-                          zIndex: zIndex}, // elements can
-                         this.props.style);           // have z-index
+    return Object.assign({position: 'relative', // only positioned
+                          zIndex: zIndex},      // elements can
+                         this.props.style);     // have z-index
   },
 
   // In this and the following function, we scale up in proportion to
