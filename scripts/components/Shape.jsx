@@ -11,7 +11,7 @@ import shallowEqual from 'react/lib/shallowEqual';
 // h/t Antti Sykäri http://stackoverflow.com/a/19303725
 function seedrandom(seed) {
   return function rng() {
-    let x = Math.sin(seed++) * 10000;
+    const x = Math.sin(seed++) * 10000;
     return x - Math.floor(x);
   };
 }
@@ -22,7 +22,7 @@ function clip(n, min, max) {
 
 // an optimized reductions (clojure) / scanl (haskell) function
 function reductions(callback, initial, array) {
-  let result = new Array(array.length + 1);
+  const result = new Array(array.length + 1);
   result[0] = initial;
   array.forEach( (element, index) =>
     result[index + 1] = callback(result[index], element)
