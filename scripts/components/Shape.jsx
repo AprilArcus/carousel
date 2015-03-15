@@ -84,11 +84,11 @@ function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
   const k = sum / (2 * Math.PI);
   const normalizedAngleSteps = angleSteps.map(e => e / k);
 
-  // now generate the points
+  // now generate the points.
   const angles = reductions((x, y) => x + y,
                             uniform(0, 2 * Math.PI),
-                            normalizedAngleSteps);
-  const points = angles.slice(0, -1).map(angle => {
+                            normalizedAngleSteps).slice(0, -1);
+  const points = angles.map(angle => {
     const radius = clip(gauss(aveRadius, spikeyness), 0, 2 * aveRadius);
     const x = ctrX + radius * Math.cos(angle);
     const y = ctrY + radius * Math.sin(angle);
