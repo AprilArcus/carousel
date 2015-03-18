@@ -11,6 +11,7 @@ import Arrow from './Arrow';
 import Heart from './Heart';
 import CarouselStore from '../stores/CarouselStore';
 import CarouselActions from '../actions/CarouselActions';
+import memoize from '../utils/memoize';
 
 export default React.createClass({
   mixins: [PureRenderMixin],
@@ -63,17 +64,8 @@ export default React.createClass({
       sliding: this.enums.sliding.STOPPED,
       offsetIndex: 0,
       genericInteractions: 0,
-      gameOver: false,            // STUPID HACK ALERT
-      itemStyle: this.itemStyle() // calculate this once so that we can
-    };                            // maintain strict object equality
-  },                              // when we pass it to our children.
-                                  // TODO: purify and memoize all style
-                                  //       functions
-
-  componentWillReceiveProps(nextProps) {
-    if (this.props.numSlots !== nextProps.numSlots) {
-      this.setState({itemStyle: this.itemStyle()});
-    }
+      gameOver: false
+    };
   },
 
   componentDidMount() {
@@ -288,13 +280,13 @@ export default React.createClass({
     };
   },
 
-  itemStyle() {
-    const itemWidth = 100 / this.props.numSlots;
+  itemStyle: memoize(function(numSlots){
+    const itemWidth = 100 / numSlots;
     return {
       display: 'inline-block',
       width: `${itemWidth}%`
     };
-  },
+  }),
 
   staticStyles: {
     arrow: {
@@ -338,7 +330,7 @@ export default React.createClass({
     return this.getItems().map( ({shape, sliceIndex, storeIndex}) =>
       <Shape key={sliceIndex}
              storeIndex={storeIndex}
-             style={this.state.itemStyle}
+             style={this.itemStyle(this.props.numSlots)}
              data={shape}
              prefixes={this.props.prefixes} />
     );

@@ -184,6 +184,7 @@ export default React.createClass({
 
   render() {
     const {hue, points, zIndex} = generateRandomPolygon(this.props.data);
+
     return <div ref="component"
                 style={this.containerStyle(zIndex)}>
              <svg width="100%"
