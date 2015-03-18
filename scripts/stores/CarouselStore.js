@@ -67,9 +67,9 @@ function hit(index) {
   _shapes = _shapes.set(index, updatedShape);
 }
 
-// h/t Bill Fisher for the ES6 class approach, which reads somewhat
-// clearer than the minimalist ES5 approach in the reference
-// implementaiton in examples/flux-todomvc/js/stores/TodoStore.js
+// h/t Bill Fisher for the ES6 class approach, which reads more clearly
+// than the minimalist ES5 approach in the reference implementation
+// in flux/examples/flux-todomvc/js/stores/TodoStore.js
 // https://speakerdeck.com/fisherwebdev/flux-react
 class CarouselStore extends EventEmitter {
 
@@ -115,7 +115,7 @@ class CarouselStore extends EventEmitter {
   getCircularizedSlice(startIndex, endIndex) {
     if (_shapes.size === 0) return [];
     // A unique and stable key is useful to our React client, in that it
-    // obviates unecessary DOM operations. If our client didn't want to
+    // obviates unnecessary DOM operations. If our client didn't want to
     // pad out its view to allow wrapping, the storeIndex would be fine
     // by itself, but since some shapes will be rendered twice, we take
     // extra care to provide both a valid index into the original store

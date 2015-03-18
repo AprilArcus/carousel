@@ -1,24 +1,53 @@
-export default function memoize(callback) {
-    const cache = new Map;
+/* eslint-env es6 */
+function iterativeLookup(args, cache, callback) {
+  for (let i = 0; i < args.length; ++i) {
+    if (i < args.length - 1) {
+      if (!cache.has(args[i])) {
+        cache.set(args[i], new Map());
+      }
+      cache = cache.get(args[i]);
+    } else {
+      if (!cache.has(args[i])) {
+        cache.set(args[i], callback());
+      }
+      return cache.get(args[i]);
+    }
+  };
+}
 
-    return function(...args){
-        let curriedCache = cache;
-        let curriedVal;
+function recursiveLookup(args, cache, callback) {
+  // base case
+  if (args.length === 1) {
+    if (!cache.has(args[0])) {
+      cache.set(args[0], callback());
+    }
+    return cache.get(args[0]);
+  }
+  // recursive case
+  if (!cache.has(args[0])) {
+    cache.set(args[0], new Map());
+  }
+  // Testing out Babel's tail call optimization. This should be
+  // transpiled into a while() loop. Repetitive sub-slicing of args
+  // will cause heap fragmentation; the iterative version will be
+  // be more performant in practice.
+  recursiveLookup(args[1,-1], cache.get(args[0]), callback);
+}
 
-        args.forEach((arg, index) => {
-            curriedVal = curriedCache.get(arg);
-            if (curriedVal === undefined) {
-                if (index === args.length - 1) {
-                    curriedVal = callback(args);
-                    curriedCache.set(arg, curriedVal);
-                } else {
-                    nextCache = new Map;
-                    curriedCache.set(arg, nextCache);
-                    curriedCache = nextCache;
-                }
-            } 
-        });
+export default function memoize(fn, context) {
+  const multiArgumentCache = new Map();
+  let nullArgumentCache;
 
-        return curriedVal; 
-    };
+  return function(...args) {
+    const callback = fn.bind(context, ...args);
+
+    if (args.length === 0) {
+      if (nullArgumentCache === undefined) {
+        nullArgumentCache = callback.call(context);
+      }
+      return nullArgumentCache
+    } else {
+      return iterativeLookup(args, multiArgumentCache, callback);
+    }
+  };
 }

@@ -259,7 +259,7 @@ export default React.createClass({
     };
   },
 
-  messageStyle() {
+  messageStyle: function() {
     let transform, transition, lineHeight;
     if (this.state.gameOver) {
       transform = 'scale(1,1)';
