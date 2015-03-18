@@ -12,7 +12,7 @@ function iterativeLookup(args, cache, callback) {
       }
       return cache.get(args[i]);
     }
-  };
+  }
 }
 
 function recursiveLookup(args, cache, callback) {
