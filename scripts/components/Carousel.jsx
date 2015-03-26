@@ -198,10 +198,11 @@ export default React.createClass({
   },
 
   renderItems() {
+    const numSlots = this.props.numSlots;
     return this.getItems().map( ({shape, sliceIndex, storeIndex}) =>
       <Shape key={sliceIndex}
              storeIndex={storeIndex}
-             style={styles.item({numSlots: this.props.numSlots})}
+             style={styles.item(numSlots)}
              data={shape}
              prefixes={this.props.prefixes} />
     );
@@ -217,18 +218,18 @@ export default React.createClass({
 
     return <div style={styles.container({prefixes, style})}
                 onClick={this.handleGenericInteraction}>
-             <div style={styles.endCap({prefixes})}>
+             <div style={styles.endCap(prefixes)}>
                <Arrow style={styles.arrow}
                       direction={'left'}
                       clickHandler={this.slideBackward}
                       disabled={slidingDisabled} />
              </div>
-             <div style={styles.stock({prefixes})}>
+             <div style={styles.stock(prefixes)}>
                <div ref="slider"
                     style={styles.slider({prefixes, numSlots, sliding})}>
                  {this.renderItems()}
                </div>
-               <div style={styles.messageContainer({prefixes})}>
+               <div style={styles.messageContainer(prefixes)}>
                  <div style={styles.message({prefixes, gameOver})}>
                    <span>{'Thanks for playing!'}</span>
                    <br />
@@ -243,7 +244,7 @@ export default React.createClass({
                  </div>
                </div>
              </div>
-             <div style={styles.endCap({prefixes})}>
+             <div style={styles.endCap(prefixes)}>
                <Arrow style={styles.arrow}
                       direction={'right'}
                       clickHandler={this.slideForward}
@@ -265,6 +266,8 @@ export default React.createClass({
            </div>;
   }
 });
+
+//------------------------------ Styles ------------------------------//
 
 // We generate most styles on the fly and use React to inline them.
 // While heterodox, this gives us the freedom to calculate styles on
@@ -289,7 +292,7 @@ styles = {
     return Object.assign({}, style, container);
   },
 
-  endCap({prefixes}) {          // setting negative zIndex on the
+  endCap(prefixes) {            // setting negative zIndex on the
     return {                    // carousel items would break their
       [prefixes.flexShrink]: 0, // onClick handlers, so we use positive
       zIndex: 100               // z-indices [0,20) there to randomize
@@ -302,19 +305,19 @@ styles = {
     zIndex: 1000
   },
 
-  stock({prefixes}) {               // the stock is the reference
-    return {                             // for the slider and the 'game
-      [prefixes.flexGrow]: 1,            // over' message. when running
-      display: prefixes.flex,            // at full bleed it is aesthet-
-      [prefixes.alignItems]: 'center',   // ically preferrable
-      position: 'relative'               // to use absolute positioning;
-      // position: 'absolute',           // effectively insetting the
-      // top: 0,                         // endcaps. However, doing so
-      // right: 0,                       // triggers an inscrutable
-      // bottom: 0,                      // rendering bug in Gecko.
-      // left: 0                         //
-    };                                   // TODO: file bug report with
-  },                                     //       minimal test case
+  stock(prefixes) {
+    return {                           // the stock is the reference for
+      [prefixes.flexGrow]: 1,          // the slider and the 'game over'
+      display: prefixes.flex,          // message. when running at full
+      [prefixes.alignItems]: 'center', // bleed it is aesthetically
+      position: 'relative'             // preferrable to ue absolute
+      // position: 'absolute',         // positioning; effectively
+      // top: 0,                       // insetting the endcaps.
+      // right: 0,                     // However, doing so triggers an
+      // bottom: 0,                    // inscrutable rendering bug in
+      // left: 0                       // Gecko. TODO: file bug report
+    };                                 // with minimal test case.
+  },
 
   slider({prefixes, numSlots, sliding}) {
     const slideDuration = '150ms';
@@ -342,7 +345,7 @@ styles = {
     };
   },
 
-  item({numSlots}) {
+  item(numSlots) {
     const itemWidth = 100 / numSlots;
     return {
       display: 'inline-block',
@@ -350,7 +353,7 @@ styles = {
     };
   },
 
-  messageContainer({prefixes}) {
+  messageContainer(prefixes) {
     return {
       position: 'absolute',
       top: 0,

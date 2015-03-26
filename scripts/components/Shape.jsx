@@ -3,17 +3,8 @@ import React from 'react';
 import PureComponent from './PureComponent';
 import CarouselActions from '../actions/CarouselActions';
 import randomPolygon from '../utils/randomPolygon';
-import silenceTransitionEndEvents from '../utils/silenceTransitionEndEvents'
-
-// a quick and dirty non-cryptographically secure seeded rng with an
-// API after David Bau's https://www.npmjs.com/package/seedrandom
-// h/t Antti Sykäri http://stackoverflow.com/a/19303725
-function seedrandom(seed) {
-  return function rng() {
-    const x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  };
-}
+import seedrandom from '../utils/insecureSeedRandom';
+import silenceTransitionEndEvents from '../utils/silenceTransitionEndEvents';
 
 function generateRandomPolygon(data) {
   const rng = seedrandom(data.seed);
@@ -44,16 +35,17 @@ class Shape extends PureComponent {
   render() {
     const hp = this.props.data.hp;
     const {hue, points, zIndex} = generateRandomPolygon(this.props.data);
-    const style = this.props.style;
     const prefixes = this.props.prefixes;
 
-    return <div style={styles.container({zIndex, style})}>
+    return <div style={Object.assign({},
+                                     styles.container(zIndex),
+                                     this.props.style)}>
              <svg width="100%"
                   viewBox="-50 -50 100 100"
                   style={Object.assign({overflow: 'visible'},
                                        styles.spin({prefixes, hp}))} >
                <polygon points={points}
-                        style={Object.assign(styles.polygon({hue}),
+                        style={Object.assign(styles.polygon(hue),
                                              styles.scale({prefixes, hp}))}
                         onClickCapture={this.handleClick} />
              </svg>
@@ -85,10 +77,12 @@ const tweeners = {                      /* eslint-disable key-spacing */
 };                                      /* eslint-enable key-spacing  */
 
 styles = {
-  container({style, zIndex}) {
-    return Object.assign({position: 'relative', // only positioned
-                          zIndex: zIndex},      // elements can
-                         style);                // have z-index
+  container(zIndex) {
+    // only positioned elements can have z-index
+    return {
+      position: 'relative',
+      zIndex: zIndex
+    };
   },
 
   // In this and the following function, we scale up in proportion to
@@ -112,14 +106,13 @@ styles = {
       transition = 'all 75ms ease-in';
     }
     return {
-      [prefixes.transform]:
-        `scale(${hp},${hp})`,
+      [prefixes.transform]: `scale(${hp},${hp})`,
       strokeWidth: 4 / hp,
       transition: transition
     };
   },
 
-  polygon({hue}) {
+  polygon(hue) {
     return {
       fill: `hsl(${hue},100%,50%)`,
       stroke: `hsl(${hue},100%,25%)`

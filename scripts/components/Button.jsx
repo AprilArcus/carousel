@@ -1,33 +1,52 @@
 /* eslint-env es6 */
 import React from 'react';
-import { addons } from 'react/addons';
-const PureRenderMixin = addons.PureRenderMixin;
+import PureComponent from './PureComponent';
+import enableMouseOverEvents from '../utils/enableMouseOverEvents'
 import { lighten, darken } from '../utils/colorHelpers'
 import variables from '../utils/bootstrapVariables'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
+let styles;
 
-  propTypes: {
-    bsSize: React.PropTypes.oneOf(['base', 'large', 'small', 'tiny']),
-    bsStyle: React.PropTypes.oneOf(['default', 'primary', 'success', 'info',
-                                    'warning', 'danger', 'link']),
-    disabled: React.PropTypes.bool
-  },
+class Button extends PureComponent {
 
-  getDefaultProps() {
-    return {bsStyle: 'default', bsSize: 'base'};
-  },
+  render() {
+    const bsStyle = this.props.bsStyle;
+    const bsSize = this.props.bsSize;
+    const disabled = this.props.disabled;
+    const hover = this.props.hover;
+    const active = this.props.active;
+    const focus = this.props.focus;
+    return <input {...this.props}
+                  style={Object.assign({},
+                                       styles.master({bsStyle,
+                                                      bsSize,
+                                                      disabled,
+                                                      hover,
+                                                      active,
+                                                      focus}),
+                                       this.props.style)}
+                  type="button"
+                  disabled={this.props.disabled} />;
+  }
+}
 
-  getInitialState() {
-    return {
-      hover: false,
-      active: false,
-      focus: false
-    };
-  },
+Button.propTypes = {
+  bsSize: React.PropTypes.oneOf(['base', 'large', 'small', 'tiny']),
+  bsStyle: React.PropTypes.oneOf(['default', 'primary', 'success', 'info',
+                                  'warning', 'danger', 'link']),
+  disabled: React.PropTypes.bool
+};
 
-  linkStyle() {
+Button.defaultProps = { bsStyle: 'default',
+                        bsSize: 'base',
+                        disabled: false };
+
+export default enableMouseOverEvents(Button);
+
+//------------------------------ Styles ------------------------------//
+
+styles = {
+  link({disabled, hover, focus}) {
     // styles for buttons disguised as links
 
     // https://github.com/twbs/bootstrap/blob/65721f531536e05026b1ae5f0359955c78d13156/less/buttons.less
@@ -38,10 +57,10 @@ export default React.createClass({
       backgroundColor: 'transparent'                                    // lns 98, 111
     };
 
-    if (this.props.disabled) {
+    if (disabled) {
       style.color = variables.btn.link.disabled.color;                  // ln 117
     } else {
-      if (this.state.hover || this.state.focus) {
+      if (hover || focus) {
         style.color = variables.link.hover.color;                       // ln 109
         style.textDecoration = variables.link.hover.decoration;         // ln 110
       }
@@ -50,7 +69,7 @@ export default React.createClass({
     return style;
   },
 
-  buttonStyle() {
+  button({bsStyle, bsSize, disabled, hover, active, focus}) {
     // styles specific to button-type buttons (i.e., colored roundrects)
 
     // original less styles implemented in
@@ -59,19 +78,19 @@ export default React.createClass({
     // https://github.com/twbs/bootstrap/blob/65721f531536e05026b1ae5f0359955c78d13156/less/buttons.less
     // ll 57-81
     const style = {
-      color: variables.btn[this.props.bsStyle].color,                   // ln 7
-      backgroundColor: variables.btn[this.props.bsStyle].bg,            // ln 8
-      borderColor: variables.btn[this.props.bsStyle].border,            // ln 9
-      borderRadius: variables.border_radius[this.props.bsSize],
+      color: variables.btn[bsStyle].color,                              // ln 7
+      backgroundColor: variables.btn[bsStyle].bg,                       // ln 8
+      borderColor: variables.btn[bsStyle].border,                       // ln 9
+      borderRadius: variables.border_radius[bsSize],
       fontWeight: variables.btn.font_weight                             // ln 12
     };
 
-    if (!this.props.disabled) {
-      if (this.state.hover || this.state.active || this.state.focus) {  // ll 11-15
+    if (!disabled) {
+      if (hover || active || focus) {                                   // ll 11-15
         style.backgroundColor = darken(style.backgroundColor, 10);      // ln 18
         style.borderColor = darken(style.borderColor, 12);              // ln 19
       }
-      if (this.state.active) {
+      if (active) {
         style.outline = 0;                                              // ln 41
         style.boxShadow = 'inset 0 3px 5px rgba(0,0,0,.125)';           // ln 43
       }
@@ -80,14 +99,14 @@ export default React.createClass({
     return style;
   },
 
-  style() {
+  master({bsStyle, bsSize, disabled, hover, active, focus}) {
     // https://github.com/twbs/bootstrap/blob/65721f531536e05026b1ae5f0359955c78d13156/less/buttons.less
     const baseStyle = {
       display: 'inline-block',                                          // ln 10
       marginBottom: 0,                                                  // ln 11
-      padding: `${variables.padding[this.props.bsSize].vertical}px ${variables.padding[this.props.bsSize].horizontal}px`,
-      fontSize: variables.font_size[this.props.bsSize],
-      lineHeight: variables.line_height[this.props.bsSize],
+      padding: `${variables.padding[bsSize].vertical}px ${variables.padding[bsSize].horizontal}px`,
+      fontSize: variables.font_size[bsSize],
+      lineHeight: variables.line_height[bsSize],
       textAlign: 'center',                                              // ln 13
       verticalAlign: 'middle',                                          // ln 14
       touchAction: 'manipulation',                                      // ln 15
@@ -99,29 +118,16 @@ export default React.createClass({
       whiteSpace: 'nowrap'                                              // ln 19
     };
 
-    if (this.props.disabled) {
+    if (disabled) {
       baseStyle.cursor = variables.cursor.disabled;                     // ln 49
       baseStyle.pointerEvents = 'none';                                 // ln 50
       baseStyle.opacity = 0.65;                                         // ln 51
     }
 
-    if (this.props.bsStyle === 'link') {
-      return Object.assign(baseStyle, this.linkStyle(), this.props.style);
+    if (bsStyle === 'link') {
+      return Object.assign(baseStyle, styles.link({disabled, hover, focus}));
     } else {
-      return Object.assign(baseStyle, this.buttonStyle(), this.props.style);
+      return Object.assign(baseStyle, styles.button({bsStyle, bsSize, disabled, hover, active, focus}));
     }
-  },
-
-  render() {
-    return <input {...this.props}
-                  style={this.style()}
-                  type="button"
-                  disabled={this.state.disabled}
-                  onMouseEnter={() => this.setState({hover: true})}
-                  onMouseLeave={() => this.setState({hover: false, active: false})}
-                  onMouseDown={() => this.setState({active: true})}
-                  onMouseUp={() => this.setState({active: false})}
-                  onFocus={() => this.setState({focus: true})}
-                  onBlur={() => this.setState({focus: false})} />;
   }
-});
+};

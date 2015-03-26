@@ -1,7 +1,3 @@
-function clip(n, min, max) {
-  return n < min ? min : n > max ? max : n;
-}
-
 // an optimized reductions (clojure) / scanl (haskell) function
 function reductions(callback, initial, array) {
   const result = new Array(array.length + 1);
@@ -15,8 +11,15 @@ function reductions(callback, initial, array) {
 // An ES6 translation of Mike Ounsworth's random polygon algorithm.
 // Comments original, algorithm lightly adapted to functional style.
 // c.f. http://stackoverflow.com/a/25276331
-export default function randomPolygon(ctrX, ctrY, aveRadius, irregularity,
-                                      spikeyness, numVerts, rng) {
+
+function clip(n, min, max) {
+  // I usually consider the ternary operator unreadable, but isn't this
+  // line irresistable? It looks like a Daft Punk song sounds.
+  return n < min ? min : n > max ? max : n;
+}
+
+export default function(ctrX, ctrY, aveRadius, irregularity, spikeyness,
+                        numVerts, rng) {
   // Nonce implementations of a few functions from Python's random.py
   // http://svn.python.org/projects/stackless/trunk/Lib/random.py
   // These need to be inside the scope of the random number generator
