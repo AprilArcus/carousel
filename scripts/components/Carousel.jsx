@@ -239,7 +239,7 @@ export default React.createClass({
                                     margin: '0 0.2em'}}
                             prefixes={prefixes}
                             onClick={this.handleReset} />
-                     {'Patreon'}
+                     {'React'}
                    </span>
                  </div>
                </div>
